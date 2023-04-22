@@ -16,9 +16,6 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 
 @Configuration
 public class ElasticSearchConfiguration {
-    final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-    credentialsProvider.setCredentials()
-
     @Bean
     public RestClient restClient(){
         RestClient restClient = RestClient.builder(
