@@ -1,0 +1,22 @@
+version: '3.1'
+services:
+  hello:
+    image: auc-licenta-img
+    container_name: auc-licenta-api
+    build: .
+    ports:
+      - 8080:8080
+    environment:
+      ENVIRONMENT_NAME: local
+      MONGODB_CONECTION_URL: mongodb://root:example@mongo:27017/
+    restart: always
+  mongo:
+    image: mongo:5.0.2
+    container_name: auc-licenta-mongodb
+    restart: always
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+
