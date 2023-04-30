@@ -1,6 +1,6 @@
-package com.unibuc.auclicenta.controller;
+package com.unibuc.auclicenta.controller.auth;
 
-import com.unibuc.auclicenta.Service.AuthenticationService;
+import com.unibuc.auclicenta.service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +23,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<AuthenticationResponse> register(
+    public ResponseEntity<AuthenticationResponse> authenticate(
             @RequestBody AuthenticationRequest request) {
         return ResponseEntity.ok(authenticationService.authenticate(request));
     }

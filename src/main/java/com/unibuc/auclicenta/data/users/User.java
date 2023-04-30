@@ -13,6 +13,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import javax.validation.constraints.Pattern;
 import java.util.Collection;
 import java.util.List;
 
@@ -27,6 +28,7 @@ public class User implements UserDetails {
     private String firstName;
     private String lastName;
     @Indexed(unique = true)
+    @Pattern(regexp = "^[\\w-\\.]+@([\\w-\\.])+[\\w-]{2,4}$", message = "Email has invalid format")
     private String email;
     private String password;
     @Indexed

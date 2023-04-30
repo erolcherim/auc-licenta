@@ -1,4 +1,4 @@
-package com.unibuc.auclicenta.controller;
+package com.unibuc.auclicenta.controller.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthenticationRequest {
+public class RegisterRequest {
+    private String firstName;
+    private String lastName;
     private String email;
     private String password;
+    private String confirmPassword;
 }

@@ -1,4 +1,4 @@
-package com.unibuc.auclicenta.controller;
+package com.unibuc.auclicenta.controller.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

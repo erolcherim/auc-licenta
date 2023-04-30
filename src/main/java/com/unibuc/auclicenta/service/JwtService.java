@@ -1,4 +1,4 @@
-package com.unibuc.auclicenta.Service;
+package com.unibuc.auclicenta.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
