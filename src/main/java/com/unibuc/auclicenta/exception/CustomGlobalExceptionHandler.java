@@ -41,4 +41,9 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
     public ResponseEntity<Object> userNotFound(RuntimeException exception, WebRequest request) {
         return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }
+
+    @ExceptionHandler(SamePasswordException.class)
+    public ResponseEntity<Object> samePassword(RuntimeException exception, WebRequest request) {
+        return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), HttpStatus.NOT_FOUND, request);
+    }
 }

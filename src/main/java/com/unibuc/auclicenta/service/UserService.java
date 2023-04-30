@@ -4,6 +4,7 @@ import com.unibuc.auclicenta.controller.user.ChangePasswordRequest;
 import com.unibuc.auclicenta.controller.user.UserResponse;
 import com.unibuc.auclicenta.data.users.User;
 import com.unibuc.auclicenta.exception.PasswordsDoNotMatchException;
+import com.unibuc.auclicenta.exception.SamePasswordException;
 import com.unibuc.auclicenta.exception.UserNotFoundException;
 import com.unibuc.auclicenta.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,14 +31,19 @@ public class UserService {
     public String changePassword(String id, ChangePasswordRequest request) {
         User user = userRepository.findById(id)
                 .orElseThrow(UserNotFoundException::new);
+
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
+
         if (!request.getPassword().equals(request.getConfirmPassword())) {
             throw new PasswordsDoNotMatchException();
+        } else if (passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new SamePasswordException();
         }
-        // TODO store old passwords in db to check if newpass == oldpass
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        user.setPassword(encodedPassword);
         userRepository.save(user);
+
         //TODO force logout of user when password is changed
         return "Password updated successfully";
     }
-
 }
