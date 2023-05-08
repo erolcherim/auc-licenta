@@ -1,6 +1,6 @@
 version: '3.1'
 services:
-  hello:
+  api:
     image: auc-licenta-img
     container_name: auc-licenta-api
     build: .
@@ -8,8 +8,11 @@ services:
       - 8080:8080
     environment:
       ENVIRONMENT_NAME: local
-      MONGODB_CONECTION_URL: mongodb://root:example@mongo:27017/
+      MONGODB_CONNECTION_URL: mongodb://root:example@mongo:27017/
     restart: always
+    depends_on: 
+      - elasticsearch
+      - kibana
   mongo:
     image: mongo:5.0.2
     container_name: auc-licenta-mongodb
@@ -19,4 +22,31 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
-
+  mongo-admin-ui:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8090:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
+  elasticsearch:
+    container_name: auc-licenta-es
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.10
+    hostname: elasticsearch
+    environment:
+      - xpack.security.enabled=false
+      - "discovery.type=single-node"
+    mem_limit: 2048m
+    ports:
+      - 9200:9200
+  kibana:
+    container_name: auc-licenta-kibana
+    image: docker.elastic.co/kibana/kibana:7.17.10
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    ports:
+      - 5601:5601
