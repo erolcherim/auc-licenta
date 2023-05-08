@@ -26,6 +26,8 @@ public class JwtService {
         return extractClaims(jwt, Claims::getSubject);
     }
 
+    public String extractUserId(String jwt){ return extractClaims(jwt, Claims::getId);}
+
     private Claims extractAllClaims(String jwt) {
         return Jwts.parserBuilder().setSigningKey(getSignInKey()).build().parseClaimsJws(jwt).getBody();
     }
