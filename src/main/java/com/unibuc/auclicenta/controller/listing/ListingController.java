@@ -20,7 +20,13 @@ public class ListingController {
     @PostMapping("/")
     @ResponseBody
     public ResponseEntity<ListingRequest> saveListing(@RequestBody ListingRequest listingRequest) {
-        return ResponseEntity.ok(listingService.saveListing(listingRequest));
+        return ResponseEntity.ok(listingService.createListing(listingRequest));
+    }
+
+    @PutMapping("/bid/search")
+    @ResponseBody
+    public void bidOnListing(@RequestBody BidRequest bidRequest, @RequestParam String id) {
+        listingService.bidOnListing(bidRequest, id);
     }
 
     @GetMapping("/results/scores")

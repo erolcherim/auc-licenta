@@ -47,7 +47,7 @@ public class AuthenticationService {
             throw new UserAlreadyExistsException();
         } else {
             userRepository.save(user);
-            var jwtToken = jwtService.generateToken(user); //TODO remove
+            var jwtToken = jwtService.generateToken(user); //TODO remove; we don't want the user to be logged in when he registers
             return AuthenticationResponse
                     .builder()
                     .token(jwtToken)

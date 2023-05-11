@@ -43,7 +43,13 @@ public class UserService {
         user.setPassword(encodedPassword);
         userRepository.save(user);
 
-        //TODO force logout of user when password is changed
+        //TODO force logout of user when password is changed (might be done by calling logout() in frontend)
         return "Password updated successfully";
+    }
+
+    public String getUserIdByEmail(String email){
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(UserNotFoundException::new);
+        return user.getId();
     }
 }

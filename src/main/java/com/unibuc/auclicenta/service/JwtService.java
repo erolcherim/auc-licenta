@@ -25,9 +25,7 @@ public class JwtService {
     public String extractUserEmail(String jwt) {
         return extractClaims(jwt, Claims::getSubject);
     }
-
-    public String extractUserId(String jwt){ return extractClaims(jwt, Claims::getId);}
-
+    
     private Claims extractAllClaims(String jwt) {
         return Jwts.parserBuilder().setSigningKey(getSignInKey()).build().parseClaimsJws(jwt).getBody();
     }
@@ -69,4 +67,5 @@ public class JwtService {
     private boolean isTokenExpired(String jwt) {
         return extractExpiration(jwt).before(new Date());
     }
+
 }

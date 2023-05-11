@@ -1,6 +1,6 @@
 package com.unibuc.auclicenta.exception;
 
-import io.jsonwebtoken.ExpiredJwtException;
+import org.apache.lucene.index.IndexNotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,11 +51,21 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
 
     @ExceptionHandler(SamePasswordException.class)
     public ResponseEntity<Object> samePassword(RuntimeException exception, WebRequest request) {
+        return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<Object> entityNotFound(RuntimeException exception, WebRequest request) {
         return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }
 
-    @ExceptionHandler(ExpiredJwtException.class)
-    public ResponseEntity<Object> expiredToken(RuntimeException exception, WebRequest request) {
+    @ExceptionHandler(InvalidBidAmountException.class)
+    public ResponseEntity<Object> invalidBidAmount(RuntimeException exception, WebRequest request) {
+        return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ExceptionHandler(IndexNotFoundException.class)
+    public ResponseEntity<Object> invalidIndex(RuntimeException exception, WebRequest request) {
         return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 }
