@@ -1,14 +1,13 @@
 package com.unibuc.auclicenta.controller.listing;
 
+import com.unibuc.auclicenta.data.Listing;
 import com.unibuc.auclicenta.service.ListingService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @Controller
@@ -29,9 +28,9 @@ public class ListingController {
         listingService.bidOnListing(bidRequest, id);
     }
 
-    @GetMapping("/results/scores")
+    @GetMapping("/results/search")
     @ResponseBody
-    public List<Float> getSearchHitScoresForNameQuery(@RequestParam String name) {
-        return listingService.getListingByName(name).stream().map(SearchHit::getScore).collect(Collectors.toList());
+    public List<Listing> getSearchHitScoresForNameQuery(@RequestBody SearchRequest request) {
+        return listingService.getListingByName(request).toList();
     }
 }

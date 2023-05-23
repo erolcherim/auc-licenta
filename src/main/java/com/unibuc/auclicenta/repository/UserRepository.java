@@ -1,6 +1,6 @@
 package com.unibuc.auclicenta.repository;
 
-import com.unibuc.auclicenta.data.users.User;
+import com.unibuc.auclicenta.data.user.User;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,4 +1,4 @@
-package com.unibuc.auclicenta.data.listing;
+package com.unibuc.auclicenta.data;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

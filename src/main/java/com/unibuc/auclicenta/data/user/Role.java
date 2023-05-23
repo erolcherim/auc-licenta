@@ -1,4 +1,4 @@
-package com.unibuc.auclicenta.data.users;
+package com.unibuc.auclicenta.data.user;
 
 public enum Role {
     USER("user"),

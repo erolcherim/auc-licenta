@@ -2,7 +2,7 @@ package com.unibuc.auclicenta.service;
 
 import com.unibuc.auclicenta.controller.user.ChangePasswordRequest;
 import com.unibuc.auclicenta.controller.user.UserResponse;
-import com.unibuc.auclicenta.data.users.User;
+import com.unibuc.auclicenta.data.user.User;
 import com.unibuc.auclicenta.exception.PasswordsDoNotMatchException;
 import com.unibuc.auclicenta.exception.SamePasswordException;
 import com.unibuc.auclicenta.exception.UserNotFoundException;

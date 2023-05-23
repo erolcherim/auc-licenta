@@ -2,12 +2,15 @@ package com.unibuc.auclicenta.service;
 
 import com.unibuc.auclicenta.controller.listing.BidRequest;
 import com.unibuc.auclicenta.controller.listing.ListingRequest;
-import com.unibuc.auclicenta.data.listing.Listing;
+import com.unibuc.auclicenta.controller.listing.SearchRequest;
+import com.unibuc.auclicenta.data.Listing;
 import com.unibuc.auclicenta.exception.EntityNotFoundException;
 import com.unibuc.auclicenta.exception.InvalidBidAmountException;
 import com.unibuc.auclicenta.repository.ListingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -60,7 +63,9 @@ public class ListingService {
         }
     }
 
-    public SearchHits<Listing> getListingByName(String name) {
-        return listingRepository.findByName(name);
+    public Page<Listing> getListingByName(SearchRequest request) {
+        // 0 = ASC, * = DESC
+        Sort.Direction direction = request.getSortOrder() == 0 ? Sort.Direction.ASC : Sort.Direction.DESC;
+        return listingRepository.findByName(request.getName(), PageRequest.of(request.getPage(), request.getPageSize()).withSort(direction, request.getSortBy()));
     }
 }

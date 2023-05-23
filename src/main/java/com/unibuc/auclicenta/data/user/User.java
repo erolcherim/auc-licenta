@@ -1,4 +1,4 @@
-package com.unibuc.auclicenta.data.users;
+package com.unibuc.auclicenta.data.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,6 +38,7 @@ public class User implements UserDetails {
     private Role role;
     @CreatedDate
     private Date registeredDate;
+    private List<String> favorites;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
