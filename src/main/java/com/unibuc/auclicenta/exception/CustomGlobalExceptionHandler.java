@@ -1,6 +1,6 @@
 package com.unibuc.auclicenta.exception;
 
-import org.apache.lucene.index.IndexNotFoundException;
+import org.elasticsearch.index.IndexNotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -72,5 +72,25 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
     @ExceptionHandler(DuplicateEntityException.class)
     public ResponseEntity<Object> duplicateEntity(RuntimeException exception, WebRequest request) {
         return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), HttpStatus.CONFLICT, request);
+    }
+
+    @ExceptionHandler(ListingIsActiveException.class)
+    public ResponseEntity<Object> attemptToDelete(RuntimeException exception, WebRequest request) {
+        return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ExceptionHandler(InvalidStartingPriceException.class)
+    public ResponseEntity<Object> invalidStartingPrice(RuntimeException exception, WebRequest request) {
+        return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ExceptionHandler(InsufficientFundsException.class)
+    public ResponseEntity<Object> insufficientFunds(RuntimeException exception, WebRequest request) {
+        return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ExceptionHandler(InvalidTopUpAmountException.class)
+    public ResponseEntity<Object> invalidTopUpAmount(RuntimeException exception, WebRequest request) {
+        return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 }

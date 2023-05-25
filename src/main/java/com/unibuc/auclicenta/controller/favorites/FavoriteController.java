@@ -25,12 +25,12 @@ public class FavoriteController {
         return ResponseEntity.ok(favoriteService.getListingsForLoggedInUser());
     }
 
-    @PutMapping("/add/{id}")
+    @PutMapping("/add/{id}") //TODO: make it POST
     public ResponseEntity<String> addListingToFavorites(@PathVariable String id) {
         return ResponseEntity.ok(favoriteService.addListingToFavorites(id));
     }
 
-    @PutMapping("/remove/{id}")
+    @PutMapping("/remove/{id}") //TODO: make it DELETE
     public ResponseEntity<String> removeListingFromFavorites(@PathVariable String id) {
         return ResponseEntity.ok(favoriteService.removeListingFromFavorites(id));
     }

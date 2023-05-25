@@ -7,13 +7,14 @@ import org.springframework.data.elasticsearch.annotations.Query;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 
 public interface ListingRepository extends ElasticsearchRepository<Listing, String> {
-   // @Query("{\"match\": {\"name\": {\"query\": \"?0\"}}}")
+    @Query("{\"match\": {\"name\": {\"query\": \"?0\"}}}")
     Page<Listing> findByName(String name, Pageable pageable);
+    Optional<Listing> findByIdAndIsActive(String id, Boolean isActive);
     List<Listing> findByIsActive(Boolean isActive);
-
     @Query("{\n" +
             "    \"function_score\": {\n" +
             "      \"query\": {\n" +
@@ -21,7 +22,12 @@ public interface ListingRepository extends ElasticsearchRepository<Listing, Stri
             "          \"should\": [\n" +
             "            {\n" +
             "              \"match\": {\n" +
-            "                \"name\": \"dell xps\"\n" +
+            "                \"name\": \"?0\"\n" +
+            "              }\n" +
+            "            },\n" +
+            "            {\n" +
+            "              \"match\": {\n" +
+            "                \"isActive\": \"true\"\n" +
             "              }\n" +
             "            }\n" +
             "          ]\n" +
@@ -31,7 +37,13 @@ public interface ListingRepository extends ElasticsearchRepository<Listing, Stri
             "        {\n" +
             "          \"script_score\": {\n" +
             "            \"script\": {\n" +
-            "              \"source\": \"decayNumericLinear(params.origin, params.scale, params.offset, params.decay,doc['currentPrice'].value)\", \"params\":{\"origin\":1500, \"scale\":1500.0, \"decay\":0.5, \"offset\":0}\n" +
+            "              \"source\": \"decayNumericLinear(params.origin, params.scale, params.offset, params.decay,doc['currentPrice'].value)\",\n" +
+            "              \"params\": {\n" +
+            "                \"origin\": ?1,\n" +
+            "                \"scale\": ?1,\n" +
+            "                \"decay\": 0.5,\n" +
+            "                \"offset\": 0\n" +
+            "              }\n" +
             "            }\n" +
             "          }\n" +
             "        }\n" +
@@ -39,5 +51,5 @@ public interface ListingRepository extends ElasticsearchRepository<Listing, Stri
             "      \"boost_mode\": \"sum\"\n" +
             "    }\n" +
             "  }")
-    Page<Listing> customFindQuery(String name, Integer currentPrice, Pageable pageable); //find most relevant by name in price range
+    Page<Listing> findByNameNearPrice(String name, int currentPrice, Pageable pageable); //find most relevant by name near suggested price
 }

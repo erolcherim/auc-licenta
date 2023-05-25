@@ -33,6 +33,7 @@ public class User implements UserDetails {
     @Pattern(regexp = "^[\\w-.]+@([\\w-.])+[\\w-]{2,4}$", message = "Email has invalid format")
     private String email;
     private String password;
+    private int balance;
     @Indexed
     @Field(targetType = FieldType.STRING)
     private Role role;

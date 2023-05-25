@@ -15,7 +15,7 @@ public class EsConfiguration extends ElasticsearchConfiguration {
     @Override
     public ClientConfiguration clientConfiguration() {
         return ClientConfiguration.builder()
-//                .connectedTo("elasticsearch:9200") //running inside container
+//                .connectedTo("elasticsearch:9200") //running inside container TODO modify when releasing with docker img
                 .connectedTo("localhost:9200") //running locally on machine
                 .build();
     }

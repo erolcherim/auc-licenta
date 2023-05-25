@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class BidRequest {
-    public int updatedPrice;
+public class ListingResponse {
+    private String id;
+    private String name;
+    private Integer startingPrice;
 }

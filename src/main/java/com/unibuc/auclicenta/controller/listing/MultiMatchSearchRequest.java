@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class MultiMatchSearchRequest {
     private static final Integer DEFAULT_SIZE=25;
     private String name;
-    private Integer currentPrice;
+    private int currentPrice;
     private Integer page;
     private Integer pageSize;
     public Integer getPageSize(){

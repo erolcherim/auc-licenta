@@ -1,5 +1,7 @@
 package com.unibuc.auclicenta.data;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -39,6 +41,8 @@ public class Listing implements Persistable<String>, Serializable {
     @CreatedDate
     @Field(type = FieldType.Date, format = DateFormat.date_time)
     private Date createdDate;
+    @Field(type = FieldType.Date, format = DateFormat.date_time)
+    private Date activatedDate;
 
     @Override
     public boolean isNew() {
@@ -46,9 +50,12 @@ public class Listing implements Persistable<String>, Serializable {
     }
 
     @Builder
+    @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class Bid {
+    @JsonDeserialize
+    @JsonSerialize
+    public static class Bid{
         @Field(type = FieldType.Text)
         private String bidderId;
         @Field(type = FieldType.Integer)

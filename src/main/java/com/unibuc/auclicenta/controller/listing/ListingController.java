@@ -18,19 +18,42 @@ public class ListingController {
 
     @PostMapping("/")
     @ResponseBody
-    public ResponseEntity<ListingRequest> saveListing(@RequestBody ListingRequest listingRequest) {
+    public ResponseEntity<ListingResponse> saveListing(@RequestBody ListingRequest listingRequest) {
         return ResponseEntity.ok(listingService.createListing(listingRequest));
     }
 
-    @PutMapping("/bid/search")
+    @PostMapping("/bid/{id}")
     @ResponseBody
-    public void bidOnListing(@RequestBody BidRequest bidRequest, @RequestParam String id) {
-        listingService.bidOnListing(bidRequest, id);
+    public ResponseEntity<String> bidOnListing(@RequestBody BidRequest bidRequest, @PathVariable String id) {
+        return ResponseEntity.ok(listingService.bidOnListing(bidRequest, id));
     }
 
-    @GetMapping("/results/search")
+    @GetMapping("/{id}")
     @ResponseBody
-    public List<Listing> getSearchHitScoresForNameQuery(@RequestBody MultiMatchSearchRequest request) {
-        return listingService.getListingMultiMatch(request).toList();
+    public ResponseEntity<Listing> getListingById(@PathVariable String id) {
+        return ResponseEntity.ok(listingService.getListingById(id));
+    }
+
+    @GetMapping("/multi-search")
+    @ResponseBody
+    public ResponseEntity<List<Listing>> getSearchHitScoresForNameQuery(@RequestBody MultiMatchSearchRequest request) {
+        return ResponseEntity.ok(listingService.getListingMultiMatch(request).toList());
+    }
+
+    @GetMapping("/search")
+    @ResponseBody
+    public ResponseEntity<List<Listing>> getSearchHitScoresForNameQuery(@RequestBody SearchRequest request) {
+        return ResponseEntity.ok(listingService.getListingByName(request).toList());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ListingRequest> updateListingById(@RequestBody ListingRequest request, @PathVariable String id) {
+        return ResponseEntity.ok(listingService.updateListing(request, id));
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseBody
+    public ResponseEntity<String> deleteListing(@PathVariable String id) {
+        return ResponseEntity.ok(listingService.deleteListing(id));
     }
 }

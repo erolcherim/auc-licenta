@@ -38,6 +38,7 @@ public class AuthenticationService {
                 .firstName((registerRequest.getFirstName()))
                 .lastName(registerRequest.getLastName())
                 .email(registerRequest.getEmail().toLowerCase())
+                .balance(10)
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
                 .favorites(new ArrayList<>())
                 .role(Role.USER)

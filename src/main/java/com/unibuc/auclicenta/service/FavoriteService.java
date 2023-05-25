@@ -27,7 +27,8 @@ public class FavoriteService {
         List<Listing> favoriteListings = new ArrayList<>();
         for (String favorite :
                 user.getFavorites()) {
-            favoriteListings.add(listingRepository.findById(favorite).orElseThrow(EntityNotFoundException::new));
+            favoriteListings.add(listingRepository.findById(favorite).orElse(null));
+            favoriteListings.remove(null);
         }
         return favoriteListings;
     }
