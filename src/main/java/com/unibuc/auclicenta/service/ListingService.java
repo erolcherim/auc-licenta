@@ -2,11 +2,13 @@ package com.unibuc.auclicenta.service;
 
 import com.unibuc.auclicenta.controller.listing.BidRequest;
 import com.unibuc.auclicenta.controller.listing.ListingRequest;
+import com.unibuc.auclicenta.controller.listing.MultiMatchSearchRequest;
 import com.unibuc.auclicenta.controller.listing.SearchRequest;
 import com.unibuc.auclicenta.data.Listing;
 import com.unibuc.auclicenta.exception.EntityNotFoundException;
 import com.unibuc.auclicenta.exception.InvalidBidAmountException;
 import com.unibuc.auclicenta.repository.ListingRepository;
+import org.jobrunr.jobs.annotations.Job;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 
 @Service
 public class ListingService {
@@ -32,6 +35,7 @@ public class ListingService {
                 .startingPrice(listingRequest.getStartingPrice())
                 .currentPrice(listingRequest.getStartingPrice())
                 .bids(new ArrayList<>())
+                .isActive(false)
                 .build();
 
         listingRepository.save(listing);
@@ -67,5 +71,19 @@ public class ListingService {
         // 0 = ASC, * = DESC
         Sort.Direction direction = request.getSortOrder() == 0 ? Sort.Direction.ASC : Sort.Direction.DESC;
         return listingRepository.findByName(request.getName(), PageRequest.of(request.getPage(), request.getPageSize()).withSort(direction, request.getSortBy()));
+    }
+
+    public Page<Listing> getListingMultiMatch(MultiMatchSearchRequest request){
+        return listingRepository.customFindQuery(request.getName(), request.getCurrentPrice(), PageRequest.of(request.getPage(), request.getPageSize()));
+    }
+
+    @Job(name="test")
+    public void activateListing(){
+        List<Listing> l = listingRepository.findByIsActive(false);
+        for (Listing li:
+             l) {
+            li.setIsActive(true);
+            listingRepository.save(li);
+        }
     }
 }

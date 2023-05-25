@@ -30,7 +30,7 @@ public class ListingController {
 
     @GetMapping("/results/search")
     @ResponseBody
-    public List<Listing> getSearchHitScoresForNameQuery(@RequestBody SearchRequest request) {
-        return listingService.getListingByName(request).toList();
+    public List<Listing> getSearchHitScoresForNameQuery(@RequestBody MultiMatchSearchRequest request) {
+        return listingService.getListingMultiMatch(request).toList();
     }
 }

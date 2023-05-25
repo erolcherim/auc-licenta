@@ -35,7 +35,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security:2.7.8'
     implementation 'org.springframework.security:spring-security-config:5.8.2'
 	implementation 'org.springframework.security:spring-security-config:5.8.2'
-	implementation 'org.passay:passay:1.6.2'
+	implementation 'org.jobrunr:jobrunr-spring-boot-2-starter:6.1.1'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	annotationProcessor 'org.projectlombok:lombok'

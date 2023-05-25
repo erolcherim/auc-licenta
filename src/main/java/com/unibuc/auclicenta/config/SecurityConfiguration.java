@@ -39,7 +39,7 @@ public class SecurityConfiguration {
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(exceptionHandlerFilter, JwtAuthenticationFilter.class)
-                .logout().logoutUrl("/logout").clearAuthentication(true).invalidateHttpSession(true);
+                .logout().logoutUrl("/logout").clearAuthentication(true).invalidateHttpSession(true); //not working for JWT
 
         return httpSecurity.build();
     }
