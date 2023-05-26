@@ -21,7 +21,8 @@ public class AucLicentaApplication {
     }
 
     @PostConstruct
-    public void backgroundTask() {
+    public void backgroundTasks() {
         jobScheduler.scheduleRecurrently(Cron.every30seconds(), () -> listingService.activateListing());
+        jobScheduler.scheduleRecurrently(Cron.every30seconds(), () -> listingService.deactivateListing());
     }
 }

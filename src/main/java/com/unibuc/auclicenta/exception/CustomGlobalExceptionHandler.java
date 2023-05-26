@@ -1,6 +1,7 @@
 package com.unibuc.auclicenta.exception;
 
 import org.elasticsearch.index.IndexNotFoundException;
+import org.springframework.data.elasticsearch.NoSuchIndexException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -66,6 +67,11 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
 
     @ExceptionHandler(IndexNotFoundException.class)
     public ResponseEntity<Object> invalidIndex(RuntimeException exception, WebRequest request) {
+        return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ExceptionHandler(NoSuchIndexException.class)
+    public ResponseEntity<Object> noSuchIndex(RuntimeException exception, WebRequest request) {
         return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 

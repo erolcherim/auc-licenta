@@ -2,6 +2,6 @@ package com.unibuc.auclicenta.exception;
 
 public class ListingIsActiveException extends RuntimeException {
     public ListingIsActiveException(){
-        super("Listing is active and cannot be deleted");
+        super("Listing is not in the pre-activation stage and cannot be edited/deleted");
     }
 }

@@ -1,6 +1,5 @@
 package com.unibuc.auclicenta.service;
 
-import com.unibuc.auclicenta.controller.listing.TopUpRequest;
 import com.unibuc.auclicenta.controller.user.ChangePasswordRequest;
 import com.unibuc.auclicenta.controller.user.UserResponse;
 import com.unibuc.auclicenta.data.user.User;
@@ -47,17 +46,20 @@ public class UserService {
         return "Password updated successfully";
     }
 
-    public String getUserIdByEmail(String email){
+    public String getUserIdByEmail(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(UserNotFoundException::new);
         return user.getId();
     }
 
-    public int modifyBalance(int balance, String id){
+    //TODO add delete user endpoint
+    //TODO add user can not bid on his own action
+
+    public int modifyBalance(int balance, String id) {
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
         int currentBalance = user.getBalance();
-        if (currentBalance-balance>0){
-            user.setBalance(currentBalance-balance);
+        if (currentBalance - balance > 0) {
+            user.setBalance(currentBalance - balance);
             userRepository.save(user);
             return user.getBalance();
         } else {
@@ -65,15 +67,23 @@ public class UserService {
         }
     }
 
-    public String topUp(TopUpRequest request, String id){
+    public String topUp(int amount, String id) {
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
         int currentBalance = user.getBalance();
-        if (request.getBalance()>5){
-            user.setBalance(currentBalance+ request.getBalance());
+        if (amount > 5) {
+            user.setBalance(currentBalance + amount);
             userRepository.save(user);
             return "Funds operation completed successfully. New balance: " + user.getBalance();
         } else {
             throw new InvalidTopUpAmountException();
         }
+    }
+
+    public String refundBid(int amount, String id) {
+        User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
+        int currentBalance = user.getBalance();
+        user.setBalance(currentBalance + amount);
+        userRepository.save(user);
+        return "Funds operation completed successfully. New balance: " + user.getBalance();
     }
 }

@@ -30,6 +30,8 @@ public class Listing implements Persistable<String>, Serializable {
     private String userId;
     @Field(type = FieldType.Text)
     private String name;
+    @Field(type = FieldType.Text)
+    private String description;
     @Field(type = FieldType.Integer)
     private Integer startingPrice;
     @Field(type = FieldType.Integer)
@@ -37,12 +39,15 @@ public class Listing implements Persistable<String>, Serializable {
     @Field(type = FieldType.Object)
     private List<Bid> bids;
     @Field(type = FieldType.Boolean)
-    private Boolean isActive;
+    private int isActive;
     @CreatedDate
     @Field(type = FieldType.Date, format = DateFormat.date_time)
     private Date createdDate;
     @Field(type = FieldType.Date, format = DateFormat.date_time)
     private Date activatedDate;
+    @Field(type = FieldType.Date, format = DateFormat.date_time)
+    private Date expirationDate;
+
 
     @Override
     public boolean isNew() {

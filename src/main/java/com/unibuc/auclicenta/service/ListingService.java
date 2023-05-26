@@ -3,10 +3,7 @@ package com.unibuc.auclicenta.service;
 import com.mongodb.lang.NonNull;
 import com.unibuc.auclicenta.controller.listing.*;
 import com.unibuc.auclicenta.data.Listing;
-import com.unibuc.auclicenta.exception.EntityNotFoundException;
-import com.unibuc.auclicenta.exception.InvalidBidAmountException;
-import com.unibuc.auclicenta.exception.InvalidStartingPriceException;
-import com.unibuc.auclicenta.exception.ListingIsActiveException;
+import com.unibuc.auclicenta.exception.*;
 import com.unibuc.auclicenta.repository.ListingRepository;
 import org.jobrunr.jobs.annotations.Job;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +33,7 @@ public class ListingService {
                     .startingPrice(listingRequest.getStartingPrice())
                     .currentPrice(listingRequest.getStartingPrice())
                     .bids(new ArrayList<>())
-                    .isActive(false)
+                    .isActive(0)
                     .build();
 
             listingRepository.save(listing);
@@ -52,11 +49,10 @@ public class ListingService {
     }
 
     public String bidOnListing(BidRequest bidRequest, String id) {
-        var listing = listingRepository.findByIdAndIsActive(id, true).orElseThrow(EntityNotFoundException::new);
+        var listing = listingRepository.findByIdAndIsActive(id, 1).orElseThrow(EntityNotFoundException::new);
         int updatedPrice = bidRequest.getUpdatedPrice();
 
         String loggedInUserId = userService.getUserIdByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
-        int accountBalance = userService.modifyBalance(bidRequest.getUpdatedPrice(), loggedInUserId);
 
         Listing.Bid bid = Listing.Bid.builder()
                 .bidderId(loggedInUserId)
@@ -64,8 +60,11 @@ public class ListingService {
                 .createdDate(new Date())
                 .build();
         List<Listing.Bid> bids = listing.getBids();
-
+        //TODO bug se retrag currentPrice, nu bid amount din cont
+        //TODO bug se retrag de mai multe ori desi da eroare?
+        // if (4 > 1 + 4)
         if (updatedPrice + 1 > Math.ceil(0.1 * listing.getStartingPrice()) + listing.getCurrentPrice()) {
+            int accountBalance = userService.modifyBalance(bidRequest.getUpdatedPrice(), loggedInUserId);
             bids.add(bid);
             listing.setBids(bids);
             listing.setCurrentPrice(updatedPrice);
@@ -90,22 +89,42 @@ public class ListingService {
         return listingRepository.findById(id).orElseThrow(EntityNotFoundException::new);
     }
 
-    @Job(name = "ActivateListingsRecurrent")
+    @Job(name = "activateListingsRecurrent")
     public void activateListing() {
-        List<Listing> inactiveListings = listingRepository.findByIsActive(false);
+        List<Listing> inactiveListings = listingRepository.findByIsActive(0);
 
         inactiveListings.stream()
-                .filter(x -> x.getCreatedDate().compareTo(new Date(System.currentTimeMillis() - 60 * 1000)) < 0) //Activate listings after 15 minutes TODO modify on release
+                .filter(x -> x.getCreatedDate().compareTo(new Date(System.currentTimeMillis() - 60 * 1000)) < 0) //Activate listings after 1 minutes TODO modify on release
                 .forEach(x -> {
-                    x.setIsActive(true);
+                    x.setIsActive(1);
                     x.setActivatedDate(new Date());
+                    x.setExpirationDate(new Date(System.currentTimeMillis() + 30L * 24 * 60 * 60 * 1000)); //60 * 1000
+                    listingRepository.save(x);
+                });
+    }
+
+    @Job(name = "deactivateExpiredListingsRecurrent")
+    public void deactivateListing() {
+        List<Listing> unexpiredListings = listingRepository.findByIsActive(1);
+
+        unexpiredListings.stream()
+                .filter(x -> x.getExpirationDate().compareTo(new Date(System.currentTimeMillis())) < 0)
+                .forEach(x -> {
+                    x.setIsActive(2);
+                    for (Listing.Bid b : x.getBids()) {
+                        try {
+                            userService.refundBid(b.getUpdatedPrice(), b.getBidderId());
+                        } catch (UserNotFoundException e) {
+                            continue;
+                        }
+                    }
                     listingRepository.save(x);
                 });
     }
 
     public String deleteListing(String id) {
         Listing listingToDelete = listingRepository.findById(id).orElseThrow(EntityNotFoundException::new);
-        if (!listingToDelete.getIsActive()) {
+        if (listingToDelete.getIsActive() == 0) {
             listingRepository.delete(listingToDelete);
         } else {
             throw new ListingIsActiveException();
@@ -115,12 +134,13 @@ public class ListingService {
 
     public ListingRequest updateListing(ListingRequest request, String id) {
         Listing listingToUpdate = listingRepository.findById(id).orElseThrow(EntityNotFoundException::new);
-        if (!listingToUpdate.getIsActive()) {
+        if (listingToUpdate.getIsActive() == 0) {
             String updatedName = request.getName();
             listingToUpdate.setName(updatedName);
             int updatedPrice = request.getStartingPrice();
             listingToUpdate.setStartingPrice(updatedPrice);
             listingToUpdate.setCurrentPrice(updatedPrice);
+            listingToUpdate.setCreatedDate(new Date()); //Whenever a user modifies a listing during the pre-activation period the timer resets
             listingRepository.save(listingToUpdate);
             return ListingRequest.builder()
                     .name(updatedName)

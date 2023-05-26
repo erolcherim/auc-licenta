@@ -28,6 +28,6 @@ public class UserController {
 
     @PutMapping("balance/{id}")
     public ResponseEntity<String> topUpUser(@PathVariable("id") String id, @RequestBody TopUpRequest request){
-        return ResponseEntity.ok(userService.topUp(request, id));
+        return ResponseEntity.ok(userService.topUp(request.getBalance(), id));
     }
 }

@@ -11,10 +11,11 @@ import java.util.Optional;
 
 
 public interface ListingRepository extends ElasticsearchRepository<Listing, String> {
-    @Query("{\"match\": {\"name\": {\"query\": \"?0\"}}}")
+    @Query("{\"match\": {\"name\": {\"query\": \"?0\"}}}") //TODO add isActive = 1 and recheck if all queries work
     Page<Listing> findByName(String name, Pageable pageable);
-    Optional<Listing> findByIdAndIsActive(String id, Boolean isActive);
-    List<Listing> findByIsActive(Boolean isActive);
+    Optional<Listing> findByIdAndIsActive(String id, int isActive);
+
+    List<Listing> findByIsActive(int isActive);
     @Query("{\n" +
             "    \"function_score\": {\n" +
             "      \"query\": {\n" +
@@ -24,13 +25,11 @@ public interface ListingRepository extends ElasticsearchRepository<Listing, Stri
             "              \"match\": {\n" +
             "                \"name\": \"?0\"\n" +
             "              }\n" +
-            "            },\n" +
-            "            {\n" +
-            "              \"match\": {\n" +
-            "                \"isActive\": \"true\"\n" +
-            "              }\n" +
             "            }\n" +
-            "          ]\n" +
+            "          ],\n" +
+            "          \"filter\":{\n" +
+            "            \"term\": {\"isActive\": \"1\"}\n" +
+            "          }\n" +
             "        }\n" +
             "      },\n" +
             "      \"functions\": [\n" +
