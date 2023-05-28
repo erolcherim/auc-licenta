@@ -42,8 +42,11 @@ public class UserService {
         user.setPassword(encodedPassword);
         userRepository.save(user);
 
-        //TODO force logout of user when password is changed (might be done by calling logout() in frontend)
         return "Password updated successfully";
+    }
+
+    public Boolean userExists(String id){
+        return userRepository.findById(id).isPresent();
     }
 
     public String getUserIdByEmail(String email) {
@@ -52,8 +55,17 @@ public class UserService {
         return user.getId();
     }
 
-    //TODO add delete user endpoint
-    //TODO add user can not bid on his own action
+    public UserResponse deleteUser(String id){
+        User user = userRepository.findById(id)
+                .orElseThrow(UserNotFoundException::new);
+        userRepository.deleteById(id);
+        return UserResponse.builder()
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .balance(user.getBalance())
+                .build();
+    }
 
     public int modifyBalance(int balance, String id) {
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
@@ -79,11 +91,10 @@ public class UserService {
         }
     }
 
-    public String refundBid(int amount, String id) {
+    public void refundBid(int amount, String id) {
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
         int currentBalance = user.getBalance();
         user.setBalance(currentBalance + amount);
         userRepository.save(user);
-        return "Funds operation completed successfully. New balance: " + user.getBalance();
     }
 }

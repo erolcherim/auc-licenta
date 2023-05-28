@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -24,6 +25,8 @@ public class ListingService {
     private ListingRepository listingRepository;
     @Autowired
     private UserService userService;
+    @Autowired
+    private FavoriteService favoriteService;
 
     public ListingResponse createListing(ListingRequest listingRequest) {
         if (listingRequest.getStartingPrice() > 0) {
@@ -54,21 +57,23 @@ public class ListingService {
 
         String loggedInUserId = userService.getUserIdByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
 
+        if (loggedInUserId.equals(listing.getUserId())){
+            throw new CannotBidOnOwnListingException();
+        }
         Listing.Bid bid = Listing.Bid.builder()
                 .bidderId(loggedInUserId)
                 .updatedPrice(bidRequest.getUpdatedPrice())
                 .createdDate(new Date())
                 .build();
         List<Listing.Bid> bids = listing.getBids();
-        //TODO bug se retrag currentPrice, nu bid amount din cont
-        //TODO bug se retrag de mai multe ori desi da eroare?
-        // if (4 > 1 + 4)
+
         if (updatedPrice + 1 > Math.ceil(0.1 * listing.getStartingPrice()) + listing.getCurrentPrice()) {
             int accountBalance = userService.modifyBalance(bidRequest.getUpdatedPrice(), loggedInUserId);
             bids.add(bid);
             listing.setBids(bids);
             listing.setCurrentPrice(updatedPrice);
             listingRepository.save(listing);
+            favoriteService.addListingToFavorites(listing.getId());
             return "Bid successful, new price: " + listing.getCurrentPrice() + ". Current account balance: " + accountBalance;
         } else {
             throw new InvalidBidAmountException();
@@ -98,7 +103,7 @@ public class ListingService {
                 .forEach(x -> {
                     x.setIsActive(1);
                     x.setActivatedDate(new Date());
-                    x.setExpirationDate(new Date(System.currentTimeMillis() + 30L * 24 * 60 * 60 * 1000)); //60 * 1000
+                    x.setExpirationDate(new Date(System.currentTimeMillis() + 60 * 1000)); //30L * 24 * 60 * 60 * 1000
                     listingRepository.save(x);
                 });
     }
@@ -111,14 +116,17 @@ public class ListingService {
                 .filter(x -> x.getExpirationDate().compareTo(new Date(System.currentTimeMillis())) < 0)
                 .forEach(x -> {
                     x.setIsActive(2);
-                    for (Listing.Bid b : x.getBids()) {
-                        try {
-                            userService.refundBid(b.getUpdatedPrice(), b.getBidderId());
-                        } catch (UserNotFoundException e) {
-                            continue;
-                        }
-                    }
+                    //remove users from list if they don't exist
+                    List<Listing.Bid> bidsProcessed = x.getBids().stream()
+                            .filter(b -> userService.userExists(b.getBidderId()))
+                            .collect(Collectors.toList());
+
+                    Listing.Bid highestBidder = bidsProcessed.get(bidsProcessed.size() - 1);
+                    bidsProcessed.remove(highestBidder);
+                    x.setCurrentPrice(highestBidder.getUpdatedPrice());
                     listingRepository.save(x);
+                    userService.refundBid(highestBidder.getUpdatedPrice(), x.getUserId());
+                    bidsProcessed.forEach(bi -> userService.refundBid(bi.getUpdatedPrice(), bi.getBidderId()));
                 });
     }
 

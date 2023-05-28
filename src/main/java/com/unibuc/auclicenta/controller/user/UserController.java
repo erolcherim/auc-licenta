@@ -30,4 +30,9 @@ public class UserController {
     public ResponseEntity<String> topUpUser(@PathVariable("id") String id, @RequestBody TopUpRequest request){
         return ResponseEntity.ok(userService.topUp(request.getBalance(), id));
     }
+    //TODO update user email/name
+    @DeleteMapping("{id}")
+    public ResponseEntity<UserResponse> deleteUser(@PathVariable("id") String id){
+        return ResponseEntity.ok(userService.deleteUser(id));
+    }
 }

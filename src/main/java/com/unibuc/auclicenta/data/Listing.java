@@ -38,7 +38,7 @@ public class Listing implements Persistable<String>, Serializable {
     private Integer currentPrice;
     @Field(type = FieldType.Object)
     private List<Bid> bids;
-    @Field(type = FieldType.Boolean)
+    @Field(type = FieldType.Integer)
     private int isActive;
     @CreatedDate
     @Field(type = FieldType.Date, format = DateFormat.date_time)
