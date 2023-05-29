@@ -31,6 +31,8 @@ public class UserController {
         return ResponseEntity.ok(userService.topUp(request.getBalance(), id));
     }
     //TODO update user email/name
+    //TODO add images to listing
+    //TODO add auto feature
     @DeleteMapping("{id}")
     public ResponseEntity<UserResponse> deleteUser(@PathVariable("id") String id){
         return ResponseEntity.ok(userService.deleteUser(id));

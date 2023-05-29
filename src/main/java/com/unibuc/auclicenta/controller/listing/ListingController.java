@@ -7,8 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 
 @Controller
 @RequestMapping("/api/v1/listing")
@@ -34,16 +32,21 @@ public class ListingController {
         return ResponseEntity.ok(listingService.getListingById(id));
     }
 
-    @GetMapping("/multi-search")
-    @ResponseBody
-    public ResponseEntity<List<Listing>> getSearchHitScoresForNameQuery(@RequestBody MultiMatchSearchRequest request) {
-        return ResponseEntity.ok(listingService.getListingMultiMatch(request).toList());
+    @PostMapping("/search/latest")
+    public ResponseEntity<SearchResponse> getLatestListings(@RequestBody SearchRequest request) {
+        return ResponseEntity.ok(listingService.getLatestListings(request));
     }
 
-    @GetMapping("/search")
+    @PostMapping("/search/multi-search")
     @ResponseBody
-    public ResponseEntity<List<Listing>> getSearchHitScoresForNameQuery(@RequestBody SearchRequest request) {
-        return ResponseEntity.ok(listingService.getListingByName(request).toList());
+    public ResponseEntity<SearchResponse> getSearchHitScoresForNameQuery(@RequestBody MultiMatchSearchRequest request) {
+        return ResponseEntity.ok(listingService.getListingMultiMatch(request));
+    }
+
+    @PostMapping("/search/name-search")
+    @ResponseBody
+    public ResponseEntity<SearchResponse> getSearchResultsByName(@RequestBody SearchRequest request) {
+        return ResponseEntity.ok(listingService.getListingByNameWithNumber(request));
     }
 
     @PutMapping("/{id}")

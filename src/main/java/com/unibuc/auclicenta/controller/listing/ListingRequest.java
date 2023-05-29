@@ -11,5 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ListingRequest {
     private String name;
+    private String description;
     private Integer startingPrice;
 }

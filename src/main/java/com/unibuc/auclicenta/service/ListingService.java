@@ -7,7 +7,6 @@ import com.unibuc.auclicenta.exception.*;
 import com.unibuc.auclicenta.repository.ListingRepository;
 import org.jobrunr.jobs.annotations.Job;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,11 +27,38 @@ public class ListingService {
     @Autowired
     private FavoriteService favoriteService;
 
+    public Listing getListingById(String id) {
+        return listingRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+    }
+
+    public SearchResponse getListingByNameWithNumber(SearchRequest request) {
+        // 0 = ASC, * = DESC
+        Sort.Direction direction = request.getSortOrder() == 0 ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Long noResults = listingRepository.findByName(request.getName(), PageRequest.of(request.getPage(), request.getPageSize()).withSort(direction, request.getSortBy())).getTotalElements();
+        List<Listing> l = listingRepository.findByName(request.getName(), PageRequest.of(request.getPage(), request.getPageSize()).withSort(direction, request.getSortBy())).toList();
+        return SearchResponse.builder().noResults(noResults).listings(l).build();
+    }
+
+    public SearchResponse getListingMultiMatch(@NonNull MultiMatchSearchRequest request) {
+        List<Listing> listings = listingRepository.findByNameNearPrice(request.getName(), request.getCurrentPrice(), PageRequest.of(request.getPage(), request.getPageSize())).toList();
+        Long noResults = listingRepository.findByNameNearPrice(request.getName(), request.getCurrentPrice(), PageRequest.of(request.getPage(), request.getPageSize())).getTotalElements();
+        return SearchResponse.builder().noResults(noResults).listings(listings).build();
+    }
+
+    public SearchResponse getLatestListings(SearchRequest request) {
+        List<Listing> listings = listingRepository.findByIsActiveOrderByCreatedDateDesc(2, PageRequest.of(request.getPage(),
+                request.getPageSize()).withSort(Sort.Direction.DESC, "createdDate")).toList(); //TODO modify to 1
+        Long noResults = listingRepository.findByIsActiveOrderByCreatedDateDesc(2,
+                PageRequest.of(request.getPage(), request.getPageSize()).withSort(Sort.Direction.DESC, "createdDate")).getTotalElements();
+        return SearchResponse.builder().noResults(noResults).listings(listings).build();
+    }
+
     public ListingResponse createListing(ListingRequest listingRequest) {
         if (listingRequest.getStartingPrice() > 0) {
             var listing = Listing.builder()
                     .userId(userService.getUserIdByEmail(SecurityContextHolder.getContext().getAuthentication().getName()))
                     .name(listingRequest.getName())
+                    .description(listingRequest.getDescription())
                     .startingPrice(listingRequest.getStartingPrice())
                     .currentPrice(listingRequest.getStartingPrice())
                     .bids(new ArrayList<>())
@@ -44,11 +70,41 @@ public class ListingService {
             return ListingResponse.builder()
                     .id(listing.getId())
                     .name(listing.getName())
+                    .description(listing.getDescription())
                     .startingPrice(listing.getStartingPrice())
                     .build();
         } else {
             throw new InvalidStartingPriceException();
         }
+    }
+
+    public ListingRequest updateListing(ListingRequest request, String id) {
+        Listing listingToUpdate = listingRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+        if (listingToUpdate.getIsActive() == 0) {
+            String updatedName = request.getName();
+            listingToUpdate.setName(updatedName);
+            int updatedPrice = request.getStartingPrice();
+            listingToUpdate.setStartingPrice(updatedPrice);
+            listingToUpdate.setCurrentPrice(updatedPrice);
+            listingToUpdate.setCreatedDate(new Date()); //Whenever a user modifies a listing during the pre-activation period the timer resets
+            listingRepository.save(listingToUpdate);
+            return ListingRequest.builder()
+                    .name(updatedName)
+                    .startingPrice(updatedPrice)
+                    .build();
+        } else {
+            throw new ListingIsActiveException();
+        }
+    }
+
+    public String deleteListing(String id) {
+        Listing listingToDelete = listingRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+        if (listingToDelete.getIsActive() == 0) {
+            listingRepository.delete(listingToDelete);
+        } else {
+            throw new ListingIsActiveException();
+        }
+        return "Listing deleted successfully";
     }
 
     public String bidOnListing(BidRequest bidRequest, String id) {
@@ -57,7 +113,7 @@ public class ListingService {
 
         String loggedInUserId = userService.getUserIdByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
 
-        if (loggedInUserId.equals(listing.getUserId())){
+        if (loggedInUserId.equals(listing.getUserId())) {
             throw new CannotBidOnOwnListingException();
         }
         Listing.Bid bid = Listing.Bid.builder()
@@ -80,20 +136,9 @@ public class ListingService {
         }
     }
 
-    public Page<Listing> getListingByName(SearchRequest request) {
-        // 0 = ASC, * = DESC
-        Sort.Direction direction = request.getSortOrder() == 0 ? Sort.Direction.ASC : Sort.Direction.DESC;
-        return listingRepository.findByName(request.getName(), PageRequest.of(request.getPage(), request.getPageSize()).withSort(direction, request.getSortBy()));
-    }
-
-    public Page<Listing> getListingMultiMatch(@NonNull MultiMatchSearchRequest request) {
-        return listingRepository.findByNameNearPrice(request.getName(), request.getCurrentPrice(), PageRequest.of(request.getPage(), request.getPageSize()));
-    }
-
-    public Listing getListingById(String id) {
-        return listingRepository.findById(id).orElseThrow(EntityNotFoundException::new);
-    }
-
+    /**
+     * background tasks
+     */
     @Job(name = "activateListingsRecurrent")
     public void activateListing() {
         List<Listing> inactiveListings = listingRepository.findByIsActive(0);
@@ -121,41 +166,15 @@ public class ListingService {
                             .filter(b -> userService.userExists(b.getBidderId()))
                             .collect(Collectors.toList());
 
-                    Listing.Bid highestBidder = bidsProcessed.get(bidsProcessed.size() - 1);
-                    bidsProcessed.remove(highestBidder);
-                    x.setCurrentPrice(highestBidder.getUpdatedPrice());
+                    if (bidsProcessed.size() != 0) {
+                        Listing.Bid highestBidder = bidsProcessed.get(bidsProcessed.size() - 1);
+                        bidsProcessed.remove(highestBidder);
+                        x.setCurrentPrice(highestBidder.getUpdatedPrice());
+
+                        userService.refundBid(highestBidder.getUpdatedPrice(), x.getUserId());
+                        bidsProcessed.forEach(bi -> userService.refundBid(bi.getUpdatedPrice(), bi.getBidderId()));
+                    }
                     listingRepository.save(x);
-                    userService.refundBid(highestBidder.getUpdatedPrice(), x.getUserId());
-                    bidsProcessed.forEach(bi -> userService.refundBid(bi.getUpdatedPrice(), bi.getBidderId()));
                 });
-    }
-
-    public String deleteListing(String id) {
-        Listing listingToDelete = listingRepository.findById(id).orElseThrow(EntityNotFoundException::new);
-        if (listingToDelete.getIsActive() == 0) {
-            listingRepository.delete(listingToDelete);
-        } else {
-            throw new ListingIsActiveException();
-        }
-        return "Listing deleted successfully";
-    }
-
-    public ListingRequest updateListing(ListingRequest request, String id) {
-        Listing listingToUpdate = listingRepository.findById(id).orElseThrow(EntityNotFoundException::new);
-        if (listingToUpdate.getIsActive() == 0) {
-            String updatedName = request.getName();
-            listingToUpdate.setName(updatedName);
-            int updatedPrice = request.getStartingPrice();
-            listingToUpdate.setStartingPrice(updatedPrice);
-            listingToUpdate.setCurrentPrice(updatedPrice);
-            listingToUpdate.setCreatedDate(new Date()); //Whenever a user modifies a listing during the pre-activation period the timer resets
-            listingRepository.save(listingToUpdate);
-            return ListingRequest.builder()
-                    .name(updatedName)
-                    .startingPrice(updatedPrice)
-                    .build();
-        } else {
-            throw new ListingIsActiveException();
-        }
     }
 }
