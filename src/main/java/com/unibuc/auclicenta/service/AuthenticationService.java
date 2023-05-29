@@ -3,8 +3,8 @@ package com.unibuc.auclicenta.service;
 import com.unibuc.auclicenta.controller.auth.AuthenticationRequest;
 import com.unibuc.auclicenta.controller.auth.AuthenticationResponse;
 import com.unibuc.auclicenta.controller.auth.RegisterRequest;
-import com.unibuc.auclicenta.data.users.Role;
-import com.unibuc.auclicenta.data.users.User;
+import com.unibuc.auclicenta.data.user.Role;
+import com.unibuc.auclicenta.data.user.User;
 import com.unibuc.auclicenta.exception.AuthFailedException;
 import com.unibuc.auclicenta.exception.InvalidPasswordException;
 import com.unibuc.auclicenta.exception.PasswordsDoNotMatchException;
@@ -18,6 +18,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
@@ -35,19 +37,21 @@ public class AuthenticationService {
         var user = User.builder()
                 .firstName((registerRequest.getFirstName()))
                 .lastName(registerRequest.getLastName())
-                .email(registerRequest.getEmail())
+                .email(registerRequest.getEmail().toLowerCase())
+                .balance(10)
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
+                .favorites(new ArrayList<>())
                 .role(Role.USER)
                 .build();
         if (!registerRequest.getPassword().equals(registerRequest.getConfirmPassword())) {
             throw new PasswordsDoNotMatchException();
         } else if (!registerRequest.getPassword().matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$")) {
             throw new InvalidPasswordException();
-        } else if (userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
+        } else if (userRepository.findByEmail(registerRequest.getEmail().toLowerCase()).isPresent()) {
             throw new UserAlreadyExistsException();
         } else {
             userRepository.save(user);
-            var jwtToken = jwtService.generateToken(user); //TODO remove
+            var jwtToken = jwtService.generateToken(user); //TODO remove; we don't want the user to be logged in when he registers
             return AuthenticationResponse
                     .builder()
                     .token(jwtToken)
@@ -59,7 +63,7 @@ public class AuthenticationService {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            authenticationRequest.getEmail(),
+                            authenticationRequest.getEmail().toLowerCase(),
                             authenticationRequest.getPassword()
                     )
             );
@@ -67,7 +71,7 @@ public class AuthenticationService {
             throw new AuthFailedException();
         }
 
-        var user = userRepository.findByEmail(authenticationRequest.getEmail())
+        var user = userRepository.findByEmail(authenticationRequest.getEmail().toLowerCase())
                 .orElseThrow(() -> new UsernameNotFoundException(authenticationRequest.getEmail()));
         var jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse

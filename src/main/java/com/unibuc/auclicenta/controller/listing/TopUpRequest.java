@@ -1,4 +1,4 @@
-package com.unibuc.auclicenta.controller.user;
+package com.unibuc.auclicenta.controller.listing;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,9 +9,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserResponse {
-    private String firstName;
-    private String lastName;
-    private String email;
+public class TopUpRequest {
     private int balance;
 }

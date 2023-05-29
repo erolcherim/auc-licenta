@@ -25,9 +25,7 @@ public class JwtService {
     public String extractUserEmail(String jwt) {
         return extractClaims(jwt, Claims::getSubject);
     }
-
-    public String extractUserId(String jwt){ return extractClaims(jwt, Claims::getId);}
-
+    
     private Claims extractAllClaims(String jwt) {
         return Jwts.parserBuilder().setSigningKey(getSignInKey()).build().parseClaimsJws(jwt).getBody();
     }
@@ -56,7 +54,7 @@ public class JwtService {
                 .setClaims(claims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 60 * 1000 * 15))
+                .setExpiration(new Date(System.currentTimeMillis() + 60 * 1000 * 59)) //59 minutes
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -69,4 +67,5 @@ public class JwtService {
     private boolean isTokenExpired(String jwt) {
         return extractExpiration(jwt).before(new Date());
     }
+
 }

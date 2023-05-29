@@ -2,10 +2,8 @@ package com.unibuc.auclicenta.service;
 
 import com.unibuc.auclicenta.controller.user.ChangePasswordRequest;
 import com.unibuc.auclicenta.controller.user.UserResponse;
-import com.unibuc.auclicenta.data.users.User;
-import com.unibuc.auclicenta.exception.PasswordsDoNotMatchException;
-import com.unibuc.auclicenta.exception.SamePasswordException;
-import com.unibuc.auclicenta.exception.UserNotFoundException;
+import com.unibuc.auclicenta.data.user.User;
+import com.unibuc.auclicenta.exception.*;
 import com.unibuc.auclicenta.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,6 +22,7 @@ public class UserService {
         return UserResponse.builder()
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
+                .balance(user.getBalance())
                 .email(user.getEmail())
                 .build();
     }
@@ -43,7 +42,59 @@ public class UserService {
         user.setPassword(encodedPassword);
         userRepository.save(user);
 
-        //TODO force logout of user when password is changed
         return "Password updated successfully";
+    }
+
+    public Boolean userExists(String id){
+        return userRepository.findById(id).isPresent();
+    }
+
+    public String getUserIdByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(UserNotFoundException::new);
+        return user.getId();
+    }
+
+    public UserResponse deleteUser(String id){
+        User user = userRepository.findById(id)
+                .orElseThrow(UserNotFoundException::new);
+        userRepository.deleteById(id);
+        return UserResponse.builder()
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .balance(user.getBalance())
+                .build();
+    }
+
+    public int modifyBalance(int balance, String id) {
+        User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
+        int currentBalance = user.getBalance();
+        if (currentBalance - balance > 0) {
+            user.setBalance(currentBalance - balance);
+            userRepository.save(user);
+            return user.getBalance();
+        } else {
+            throw new InsufficientFundsException();
+        }
+    }
+
+    public String topUp(int amount, String id) {
+        User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
+        int currentBalance = user.getBalance();
+        if (amount > 5) {
+            user.setBalance(currentBalance + amount);
+            userRepository.save(user);
+            return "Funds operation completed successfully. New balance: " + user.getBalance();
+        } else {
+            throw new InvalidTopUpAmountException();
+        }
+    }
+
+    public void refundBid(int amount, String id) {
+        User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
+        int currentBalance = user.getBalance();
+        user.setBalance(currentBalance + amount);
+        userRepository.save(user);
     }
 }

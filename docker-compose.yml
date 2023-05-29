@@ -1,18 +1,18 @@
 version: '3.1'
 services:
-  api:
-    image: auc-licenta-img
-    container_name: auc-licenta-api
-    build: .
-    ports:
-      - 8080:8080
-    environment:
-      ENVIRONMENT_NAME: local
-      MONGODB_CONNECTION_URL: mongodb://root:example@mongo:27017/
-    restart: always
-    depends_on: 
-      - elasticsearch
-      - kibana
+#  api:
+#    image: auc-licenta-img
+#    container_name: auc-licenta-api
+#    build: .
+#    ports:
+#      - 8080:8080
+#    environment:
+#      ENVIRONMENT_NAME: local
+#      MONGODB_CONNECTION_URL: mongodb://root:example@mongo:27017/
+#    restart: always
+#    depends_on:
+#      - elasticsearch
+#      - kibana
   mongo:
     image: mongo:5.0.2
     container_name: auc-licenta-mongodb
