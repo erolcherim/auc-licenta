@@ -28,7 +28,7 @@ public class Listing implements Persistable<String>, Serializable {
     private String id;
     @Field(type = FieldType.Text)
     private String userId;
-    @Field(type = FieldType.Text)
+    @Field(type = FieldType.Keyword)
     private String name;
     @Field(type = FieldType.Text)
     private String description;

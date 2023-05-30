@@ -26,7 +26,7 @@ public class ListingController {
         return ResponseEntity.ok(listingService.bidOnListing(bidRequest, id));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/search/{id}")
     @ResponseBody
     public ResponseEntity<Listing> getListingById(@PathVariable String id) {
         return ResponseEntity.ok(listingService.getListingById(id));
