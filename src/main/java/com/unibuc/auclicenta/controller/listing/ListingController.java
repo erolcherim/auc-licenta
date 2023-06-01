@@ -32,6 +32,12 @@ public class ListingController {
         return ResponseEntity.ok(listingService.getListingById(id));
     }
 
+    @GetMapping("/search/current-user")
+    @ResponseBody
+    public ResponseEntity<SearchResponse> getListingsForCurrentUser(@RequestParam int page, @RequestParam int pageSize){
+        return ResponseEntity.ok(listingService.getListingsForUser(page, pageSize));
+    }
+
     @PostMapping("/search/latest")
     public ResponseEntity<SearchResponse> getLatestListings(@RequestBody SearchRequest request) {
         return ResponseEntity.ok(listingService.getLatestListings(request));

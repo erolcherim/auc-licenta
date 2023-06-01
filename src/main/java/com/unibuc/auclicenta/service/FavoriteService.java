@@ -22,11 +22,11 @@ public class FavoriteService {
     @Autowired
     private UserRepository userRepository;
 
-    public SearchResponse getListingsForLoggedInUser() {
+    public SearchResponse getListingsForLoggedInUser(int page, int pageSize) {
         String contextUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(contextUserEmail).orElseThrow(UserNotFoundException::new);
-        List<Listing> favorites = listingRepository.findByIdIn(user.getFavorites().toArray(new String[0]), PageRequest.of(0, 5)).toList();
-        Long noFavorites = listingRepository.findByIdIn(user.getFavorites().toArray(new String[0]), PageRequest.of(0, 5)).getTotalElements();
+        List<Listing> favorites = listingRepository.findByIdInAndIsActive(user.getFavorites().toArray(new String[0]), 2, PageRequest.of(page, pageSize)).toList(); //TODO modify
+        Long noFavorites = listingRepository.findByIdInAndIsActive(user.getFavorites().toArray(new String[0]), 2, PageRequest.of(page, pageSize)).getTotalElements();
         return SearchResponse.builder().listings(favorites).noResults(noFavorites).build();
     }
 

@@ -16,8 +16,8 @@ public class FavoriteController {
     private FavoriteService favoriteService;
 
     @GetMapping("/query")
-    public ResponseEntity<SearchResponse> getAllListings(@RequestParam String page, @RequestParam String pageSize) {
-        return ResponseEntity.ok(favoriteService.getListingsForLoggedInUser());
+    public ResponseEntity<SearchResponse> getAllListings(@RequestParam int page, @RequestParam int pageSize) {
+        return ResponseEntity.ok(favoriteService.getListingsForLoggedInUser(page, pageSize));
     }
 
     @PutMapping("/add/{id}") //TODO: make it POST
