@@ -69,7 +69,11 @@ public class ApplicationConfiguration {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(@NonNull CorsRegistry registry) {
-                registry.addMapping("/**").allowedOrigins(allowDomains);
+                registry.addMapping("/**")
+                        .allowedOrigins(allowDomains)
+                        .allowedMethods("*")
+                        .allowedHeaders("*")
+                        .allowCredentials(true);
             }
         };
     }

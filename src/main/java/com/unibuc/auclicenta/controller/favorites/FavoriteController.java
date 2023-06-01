@@ -1,17 +1,12 @@
 package com.unibuc.auclicenta.controller.favorites;
 
-import com.unibuc.auclicenta.data.Listing;
+import com.unibuc.auclicenta.controller.listing.SearchResponse;
 import com.unibuc.auclicenta.service.FavoriteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/api/v1/favorite")
@@ -20,8 +15,8 @@ public class FavoriteController {
     @Autowired
     private FavoriteService favoriteService;
 
-    @GetMapping("/")
-    public ResponseEntity<List<Listing>> getAllListings() {
+    @GetMapping("/query")
+    public ResponseEntity<SearchResponse> getAllListings(@RequestParam String page, @RequestParam String pageSize) {
         return ResponseEntity.ok(favoriteService.getListingsForLoggedInUser());
     }
 

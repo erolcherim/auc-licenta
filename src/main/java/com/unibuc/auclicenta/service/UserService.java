@@ -82,10 +82,10 @@ public class UserService {
     public String topUp(int amount, String id) {
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
         int currentBalance = user.getBalance();
-        if (amount > 5) {
+        if (amount >= 5) {
             user.setBalance(currentBalance + amount);
             userRepository.save(user);
-            return "Funds operation completed successfully. New balance: " + user.getBalance();
+            return "Funds operation completed successfully";
         } else {
             throw new InvalidTopUpAmountException();
         }

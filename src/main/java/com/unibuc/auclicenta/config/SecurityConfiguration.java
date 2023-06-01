@@ -24,11 +24,12 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.cors().and()
+        httpSecurity.cors()
+                .and()
                 .csrf()
                 .disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/v1/auth/**", "api/v1/**")
+                .requestMatchers("/api/v1/auth/**", "api/v1/listing/search/**")
                 .permitAll()
                 .anyRequest()
                 .authenticated()

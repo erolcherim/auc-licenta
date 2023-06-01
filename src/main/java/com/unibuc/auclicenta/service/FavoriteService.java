@@ -1,5 +1,6 @@
 package com.unibuc.auclicenta.service;
 
+import com.unibuc.auclicenta.controller.listing.SearchResponse;
 import com.unibuc.auclicenta.data.Listing;
 import com.unibuc.auclicenta.data.user.User;
 import com.unibuc.auclicenta.exception.DuplicateEntityException;
@@ -8,10 +9,10 @@ import com.unibuc.auclicenta.exception.UserNotFoundException;
 import com.unibuc.auclicenta.repository.ListingRepository;
 import com.unibuc.auclicenta.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -21,16 +22,12 @@ public class FavoriteService {
     @Autowired
     private UserRepository userRepository;
 
-    public List<Listing> getListingsForLoggedInUser() {
+    public SearchResponse getListingsForLoggedInUser() {
         String contextUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(contextUserEmail).orElseThrow(UserNotFoundException::new);
-        List<Listing> favoriteListings = new ArrayList<>();
-        for (String favorite :
-                user.getFavorites()) {
-            favoriteListings.add(listingRepository.findById(favorite).orElse(null));
-            favoriteListings.remove(null);
-        }
-        return favoriteListings;
+        List<Listing> favorites = listingRepository.findByIdIn(user.getFavorites().toArray(new String[0]), PageRequest.of(0, 5)).toList();
+        Long noFavorites = listingRepository.findByIdIn(user.getFavorites().toArray(new String[0]), PageRequest.of(0, 5)).getTotalElements();
+        return SearchResponse.builder().listings(favorites).noResults(noFavorites).build();
     }
 
     public String addListingToFavorites(String id) {

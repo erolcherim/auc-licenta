@@ -17,6 +17,8 @@ public interface ListingRepository extends ElasticsearchRepository<Listing, Stri
 
     Optional<Listing> findByIdAndIsActive(String id, int isActive);
 
+    Page<Listing> findByIdIn(String[] id, Pageable pageable);
+
     List<Listing> findByIsActive(int isActive);
 
     Page<Listing> findByIsActiveOrderByCreatedDateDesc(int isActive, Pageable pageable);

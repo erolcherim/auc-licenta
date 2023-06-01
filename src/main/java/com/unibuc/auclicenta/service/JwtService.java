@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,8 @@ import java.util.function.Function;
 @Service
 public class JwtService {
     private static final String SECRET_KEY = "7639792F423F4528482B4D6251655468576D5A7134743777217A25432646294A"; //TODO baeldung.com/java-secure-aes-key
+    @Autowired
+    private UserService userService;
 
     public String extractUserEmail(String jwt) {
         return extractClaims(jwt, Claims::getSubject);
@@ -49,6 +52,7 @@ public class JwtService {
     }
 
     public String generateToken(Map<String, Object> claims, UserDetails userDetails) {
+        claims.put("id", userService.getUserIdByEmail(userDetails.getUsername()));
         return Jwts
                 .builder()
                 .setClaims(claims)

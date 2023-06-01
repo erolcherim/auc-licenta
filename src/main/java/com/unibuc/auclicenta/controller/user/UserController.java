@@ -1,5 +1,6 @@
 package com.unibuc.auclicenta.controller.user;
 
+import com.unibuc.auclicenta.controller.StringResponse;
 import com.unibuc.auclicenta.controller.listing.TopUpRequest;
 import com.unibuc.auclicenta.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -20,15 +21,15 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
-    @PutMapping("{id}")
+    @PutMapping(value = "{id}")
     @ResponseBody
-    public ResponseEntity<String> changePassword(@PathVariable("id") String id, @RequestBody ChangePasswordRequest request) {
-        return ResponseEntity.ok(userService.changePassword(id, request));
+    public ResponseEntity<StringResponse> changePassword(@PathVariable("id") String id, @RequestBody ChangePasswordRequest request) {
+        return ResponseEntity.ok(new StringResponse(userService.changePassword(id, request)));
     }
 
-    @PutMapping("balance/{id}")
-    public ResponseEntity<String> topUpUser(@PathVariable("id") String id, @RequestBody TopUpRequest request){
-        return ResponseEntity.ok(userService.topUp(request.getBalance(), id));
+    @PostMapping("balance/{id}")
+    public ResponseEntity<StringResponse> topUpUser(@PathVariable("id") String id, @RequestBody TopUpRequest request){
+        return ResponseEntity.ok(new StringResponse(userService.topUp(request.getBalance(), id)));
     }
     //TODO update user email/name
     //TODO add images to listing
