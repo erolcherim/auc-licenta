@@ -1,5 +1,6 @@
 package com.unibuc.auclicenta.controller.listing;
 
+import com.unibuc.auclicenta.controller.StringResponse;
 import com.unibuc.auclicenta.data.Listing;
 import com.unibuc.auclicenta.service.ListingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,7 @@ public class ListingController {
 
     @PostMapping("/bid/{id}")
     @ResponseBody
-    public ResponseEntity<String> bidOnListing(@RequestBody BidRequest bidRequest, @PathVariable String id) {
+    public ResponseEntity<StringResponse> bidOnListing(@RequestBody BidRequest bidRequest, @PathVariable String id) {
         return ResponseEntity.ok(listingService.bidOnListing(bidRequest, id));
     }
 

@@ -1,6 +1,7 @@
 package com.unibuc.auclicenta.service;
 
 import com.mongodb.lang.NonNull;
+import com.unibuc.auclicenta.controller.StringResponse;
 import com.unibuc.auclicenta.controller.listing.*;
 import com.unibuc.auclicenta.data.Listing;
 import com.unibuc.auclicenta.exception.*;
@@ -24,8 +25,7 @@ public class ListingService {
     private ListingRepository listingRepository;
     @Autowired
     private UserService userService;
-    @Autowired
-    private FavoriteService favoriteService;
+
 
     public Listing getListingById(String id) {
         return listingRepository.findById(id).orElseThrow(EntityNotFoundException::new);
@@ -114,7 +114,7 @@ public class ListingService {
         return "Listing deleted successfully";
     }
 
-    public String bidOnListing(BidRequest bidRequest, String id) {
+    public StringResponse bidOnListing(BidRequest bidRequest, String id) {
         var listing = listingRepository.findByIdAndIsActive(id, 1).orElseThrow(EntityNotFoundException::new);
         int updatedPrice = bidRequest.getUpdatedPrice();
 
@@ -136,8 +136,8 @@ public class ListingService {
             listing.setBids(bids);
             listing.setCurrentPrice(updatedPrice);
             listingRepository.save(listing);
-            favoriteService.addListingToFavorites(listing.getId());
-            return "Bid successful, new price: " + listing.getCurrentPrice() + ". Current account balance: " + accountBalance;
+//            favoriteService.addListingToFavorites(listing.getId()); //TODO 409 duplicate
+            return new StringResponse("Bid successful, new price: " + listing.getCurrentPrice() + ". Current account balance: " + accountBalance);
         } else {
             throw new InvalidBidAmountException();
         }
@@ -155,7 +155,7 @@ public class ListingService {
                 .forEach(x -> {
                     x.setIsActive(1);
                     x.setActivatedDate(new Date());
-                    x.setExpirationDate(new Date(System.currentTimeMillis() + 60 * 1000)); //30L * 24 * 60 * 60 * 1000
+                    x.setExpirationDate(new Date(System.currentTimeMillis() + 30L * 24 * 60 * 60 * 1000)); // currently 30 days 60 * 10000
                     listingRepository.save(x);
                 });
     }

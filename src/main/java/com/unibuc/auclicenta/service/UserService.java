@@ -70,7 +70,7 @@ public class UserService {
     public int modifyBalance(int balance, String id) {
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
         int currentBalance = user.getBalance();
-        if (currentBalance - balance > 0) {
+        if (currentBalance - balance >= 0) {
             user.setBalance(currentBalance - balance);
             userRepository.save(user);
             return user.getBalance();
