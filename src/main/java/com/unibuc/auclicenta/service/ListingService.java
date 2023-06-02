@@ -46,16 +46,16 @@ public class ListingService {
     }
 
     public SearchResponse getLatestListings(SearchRequest request) {
-        List<Listing> listings = listingRepository.findByIsActiveOrderByCreatedDateDesc(2, PageRequest.of(request.getPage(),
-                request.getPageSize()).withSort(Sort.Direction.DESC, "createdDate")).toList(); //TODO modify to 1
-        Long noResults = listingRepository.findByIsActiveOrderByCreatedDateDesc(2,
+        List<Listing> listings = listingRepository.findByIsActiveOrderByCreatedDateDesc(1, PageRequest.of(request.getPage(),
+                request.getPageSize()).withSort(Sort.Direction.DESC, "createdDate")).toList();
+        Long noResults = listingRepository.findByIsActiveOrderByCreatedDateDesc(1,
                 PageRequest.of(request.getPage(), request.getPageSize()).withSort(Sort.Direction.DESC, "createdDate")).getTotalElements();
         return SearchResponse.builder().noResults(noResults).listings(listings).build();
     }
 
     public SearchResponse getListingsForUser(int page, int pageSize) {
         String userId = userService.getUserIdByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
-        List<Listing> listings = listingRepository.findByUserId(userId, PageRequest.of(page, pageSize).withSort(Sort.Direction.DESC, "createdDate")).toList(); //TODO modify to 1
+        List<Listing> listings = listingRepository.findByUserId(userId, PageRequest.of(page, pageSize).withSort(Sort.Direction.DESC, "createdDate")).toList();
         Long noListings = listingRepository.findByUserId(userId, PageRequest.of(page, pageSize).withSort(Sort.Direction.DESC, "createdDate")).getTotalElements();
         return SearchResponse.builder().listings(listings).noResults(noListings).build();
     }

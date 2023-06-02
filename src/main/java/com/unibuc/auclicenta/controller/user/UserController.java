@@ -21,6 +21,12 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
+    @GetMapping("")
+    public ResponseEntity<UserResponse> getCurrentUser() {
+        return ResponseEntity.ok(userService.getCurrentUser());
+    }
+
+
     @PutMapping(value = "{id}")
     @ResponseBody
     public ResponseEntity<StringResponse> changePassword(@PathVariable("id") String id, @RequestBody ChangePasswordRequest request) {

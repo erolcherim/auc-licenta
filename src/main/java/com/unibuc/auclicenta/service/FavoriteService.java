@@ -1,5 +1,6 @@
 package com.unibuc.auclicenta.service;
 
+import com.unibuc.auclicenta.controller.StringResponse;
 import com.unibuc.auclicenta.controller.listing.SearchResponse;
 import com.unibuc.auclicenta.data.Listing;
 import com.unibuc.auclicenta.data.user.User;
@@ -22,15 +23,21 @@ public class FavoriteService {
     @Autowired
     private UserRepository userRepository;
 
-    public SearchResponse getListingsForLoggedInUser(int page, int pageSize) {
+    public SearchResponse getFavoritesForLoggedInUser(int page, int pageSize) {
         String contextUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(contextUserEmail).orElseThrow(UserNotFoundException::new);
-        List<Listing> favorites = listingRepository.findByIdInAndIsActive(user.getFavorites().toArray(new String[0]), 2, PageRequest.of(page, pageSize)).toList(); //TODO modify
-        Long noFavorites = listingRepository.findByIdInAndIsActive(user.getFavorites().toArray(new String[0]), 2, PageRequest.of(page, pageSize)).getTotalElements();
+        List<Listing> favorites = listingRepository.findByIdIn(user.getFavorites().toArray(new String[0]), PageRequest.of(page, pageSize)).toList();
+        Long noFavorites = listingRepository.findByIdIn(user.getFavorites().toArray(new String[0]), PageRequest.of(page, pageSize)).getTotalElements();
         return SearchResponse.builder().listings(favorites).noResults(noFavorites).build();
     }
 
-    public String addListingToFavorites(String id) {
+    public List<String> getFavoritesIdsCurrent(){
+        String contextUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(contextUserEmail).orElseThrow(UserNotFoundException::new);
+        return user.getFavorites();
+    }
+
+    public StringResponse addListingToFavorites(String id) {
         String contextUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(contextUserEmail).orElseThrow(UserNotFoundException::new);
         List<String> favoriteListings = user.getFavorites();
@@ -39,13 +46,13 @@ public class FavoriteService {
             favoriteListings.add(listing.getId());
             user.setFavorites(favoriteListings);
             userRepository.save(user);
-            return "Listing successfully added to favorites";
+            return new StringResponse("Listing successfully added to favorites");
         } else {
             throw new DuplicateEntityException();
         }
     }
 
-    public String removeListingFromFavorites(String id) {
+    public StringResponse removeListingFromFavorites(String id) {
         String contextUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(contextUserEmail).orElseThrow(UserNotFoundException::new);
         List<String> favoriteListings = user.getFavorites();
@@ -56,6 +63,6 @@ public class FavoriteService {
         } else {
             throw new EntityNotFoundException();
         }
-        return "Listing successfully removed from favorites";
+        return new StringResponse("Listing successfully removed from favorites");
     }
 }

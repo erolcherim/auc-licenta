@@ -6,6 +6,7 @@ import com.unibuc.auclicenta.data.user.User;
 import com.unibuc.auclicenta.exception.*;
 import com.unibuc.auclicenta.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,17 @@ public class UserService {
     public UserResponse getUserById(String id) {
         User user = userRepository.findById(id)
                 .orElseThrow(UserNotFoundException::new);
+        return UserResponse.builder()
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .balance(user.getBalance())
+                .email(user.getEmail())
+                .build();
+    }
+
+    public UserResponse getCurrentUser() {
+        String userId = getUserIdByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+        User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
         return UserResponse.builder()
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
@@ -45,7 +57,7 @@ public class UserService {
         return "Password updated successfully";
     }
 
-    public Boolean userExists(String id){
+    public Boolean userExists(String id) {
         return userRepository.findById(id).isPresent();
     }
 
@@ -55,7 +67,7 @@ public class UserService {
         return user.getId();
     }
 
-    public UserResponse deleteUser(String id){
+    public UserResponse deleteUser(String id) {
         User user = userRepository.findById(id)
                 .orElseThrow(UserNotFoundException::new);
         userRepository.deleteById(id);
