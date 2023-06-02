@@ -55,8 +55,8 @@ public class ListingService {
 
     public SearchResponse getListingsForUser(int page, int pageSize) {
         String userId = userService.getUserIdByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
-        List<Listing> listings = listingRepository.findByUserIdAndIsActive(userId, 2, PageRequest.of(page, pageSize)).toList(); //TODO modify to 1
-        Long noListings = listingRepository.findByUserIdAndIsActive(userId, 2, PageRequest.of(page, pageSize)).getTotalElements();
+        List<Listing> listings = listingRepository.findByUserIdAndIsActive(userId, 2, PageRequest.of(page, pageSize).withSort(Sort.Direction.DESC, "createdDate")).toList(); //TODO modify to 1
+        Long noListings = listingRepository.findByUserIdAndIsActive(userId, 2, PageRequest.of(page, pageSize).withSort(Sort.Direction.DESC, "createdDate")).getTotalElements();
         return SearchResponse.builder().listings(listings).noResults(noListings).build();
     }
 
