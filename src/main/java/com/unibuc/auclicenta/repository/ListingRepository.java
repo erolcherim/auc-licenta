@@ -40,7 +40,7 @@ public interface ListingRepository extends ElasticsearchRepository<Listing, Stri
             "            }\n" +
             "          ],\n" +
             "          \"filter\":{\n" +
-            "            \"term\": {\"isActive\": \"2\"}\n" + //TODO: modify
+            "            \"term\": {\"isActive\": \"1\"}\n" +
             "          }\n" +
             "        }\n" +
             "      },\n" +
@@ -51,7 +51,7 @@ public interface ListingRepository extends ElasticsearchRepository<Listing, Stri
             "              \"source\": \"decayNumericLinear(params.origin, params.scale, params.offset, params.decay,doc['currentPrice'].value)\",\n" +
             "              \"params\": {\n" +
             "                \"origin\": ?1,\n" +
-            "                \"scale\": ?1,\n" +
+            "                \"scale\": ?2,\n" + // TODO CHECK IF STILL IT WORKS
             "                \"decay\": 0.5,\n" +
             "                \"offset\": 0\n" +
             "              }\n" +
@@ -62,5 +62,5 @@ public interface ListingRepository extends ElasticsearchRepository<Listing, Stri
             "      \"boost_mode\": \"sum\"\n" +
             "    }\n" +
             "  }")
-    Page<Listing> findByNameNearPrice(String name, int currentPrice, Pageable pageable); //find most relevant by name near suggested price
+    Page<Listing> findByNameNearPrice(String name, int currentPrice, int scale, Pageable pageable); //find most relevant by name near suggested price
 }

@@ -1,5 +1,6 @@
 package com.unibuc.auclicenta.config;
 
+import com.mongodb.lang.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -10,6 +11,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @RequiredArgsConstructor
@@ -29,10 +32,10 @@ public class SecurityConfiguration {
                 .csrf()
                 .disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/v1/auth/**", "api/v1/listing/search/**")
+                .requestMatchers("/api/v1/auth/**", "api/v1/listing/search/**", "api/v1/listing/image/{id}")
                 .permitAll()
-                .anyRequest()
-                .authenticated()
+                .requestMatchers("/api/v1/listing/admin/**").hasAuthority("ADMIN")
+                .anyRequest().hasAuthority("USER")
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -43,5 +46,22 @@ public class SecurityConfiguration {
                 .logout().logoutUrl("/logout").clearAuthentication(true).invalidateHttpSession(true); //not working for JWT
 
         return httpSecurity.build();
+    }
+
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        String[] allowDomains = new String[2];
+        allowDomains[0] = "http://localhost:4200";
+        allowDomains[1] = "http://localhost:8080";
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(@NonNull CorsRegistry registry) {
+                registry.addMapping("/**")
+                        .allowedOrigins(allowDomains)
+                        .allowedMethods("*")
+                        .allowedHeaders("*")
+                        .allowCredentials(true);
+            }
+        };
     }
 }

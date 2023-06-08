@@ -105,4 +105,10 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
     public ResponseEntity<Object> canNotBidOnOwnListing(RuntimeException exception, WebRequest request) {
         return handleExceptionInternal(exception, new StringResponse(exception.getMessage()), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
+
+    @ExceptionHandler(FileTypeNotAcceptedException.class)
+    public ResponseEntity<Object> invalidFileType(RuntimeException exception, WebRequest request) {
+        return handleExceptionInternal(exception, new StringResponse(exception.getMessage()), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+
 }

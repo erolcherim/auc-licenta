@@ -1,12 +1,19 @@
 package com.unibuc.auclicenta.controller.listing;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.unibuc.auclicenta.controller.StringResponse;
 import com.unibuc.auclicenta.data.Listing;
 import com.unibuc.auclicenta.service.ListingService;
+import com.unibuc.auclicenta.service.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.ServletContext;
+import java.io.IOException;
 
 
 @Controller
@@ -14,17 +21,32 @@ import org.springframework.web.bind.annotation.*;
 public class ListingController {
     @Autowired
     private ListingService listingService;
+    @Autowired
+    private StorageService storageService;
+    @Autowired
+    private ServletContext servletContext;
+
+//    @PostMapping("/")
+//    @ResponseBody
+//    public ResponseEntity<ListingResponse> saveListing(@RequestBody ListingRequest listingRequest) {
+//        return ResponseEntity.ok(listingService.createListing(listingRequest));
+//    }
 
     @PostMapping("/")
     @ResponseBody
-    public ResponseEntity<ListingResponse> saveListing(@RequestBody ListingRequest listingRequest) {
-        return ResponseEntity.ok(listingService.createListing(listingRequest));
+    public ResponseEntity<ListingResponse> saveListing(@RequestParam("model") String listingRequest, @RequestParam(value = "file", required = false) MultipartFile image) throws JsonProcessingException {
+        return ResponseEntity.ok(listingService.createListing(listingRequest, image));
     }
 
     @PostMapping("/bid/{id}")
     @ResponseBody
     public ResponseEntity<StringResponse> bidOnListing(@RequestBody BidRequest bidRequest, @PathVariable String id) {
         return ResponseEntity.ok(listingService.bidOnListing(bidRequest, id));
+    }
+
+    @GetMapping(path = "image/{id}", produces = MediaType.IMAGE_JPEG_VALUE)
+    public @ResponseBody ResponseEntity<byte[]> getImageByListingId(@PathVariable String id) {
+        return ResponseEntity.ok(storageService.getImage(id));
     }
 
     @GetMapping("/search/{id}")
@@ -35,7 +57,7 @@ public class ListingController {
 
     @GetMapping("/search/current-user")
     @ResponseBody
-    public ResponseEntity<SearchResponse> getListingsForCurrentUser(@RequestParam int page, @RequestParam int pageSize){
+    public ResponseEntity<SearchResponse> getListingsForCurrentUser(@RequestParam int page, @RequestParam int pageSize) {
         return ResponseEntity.ok(listingService.getListingsForUser(page, pageSize));
     }
 
@@ -61,9 +83,9 @@ public class ListingController {
         return ResponseEntity.ok(listingService.updateListing(request, id));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/admin/{id}")
     @ResponseBody
-    public ResponseEntity<String> deleteListing(@PathVariable String id) {
+    public ResponseEntity<StringResponse> deleteListing(@PathVariable String id) {
         return ResponseEntity.ok(listingService.deleteListing(id));
     }
 }

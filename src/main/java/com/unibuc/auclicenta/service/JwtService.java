@@ -1,5 +1,6 @@
 package com.unibuc.auclicenta.service;
 
+import com.unibuc.auclicenta.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -58,7 +59,7 @@ public class JwtService {
                 .setClaims(claims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 60 * 1000 * 59)) //59 minutes
+                .setExpiration(new Date(System.currentTimeMillis() + 60 * 1000 * 240)) //240 minutes
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
