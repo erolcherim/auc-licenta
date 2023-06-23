@@ -39,7 +39,7 @@ services:
     environment:
       - xpack.security.enabled=false
       - "discovery.type=single-node"
-    mem_limit: 4096m
+    mem_limit: 512m
     ports:
       - 9200:9200
   kibana:

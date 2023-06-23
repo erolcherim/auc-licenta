@@ -16,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -71,7 +72,7 @@ public class ListingService {
     public ListingResponse createListing(String request, MultipartFile image) throws JsonProcessingException {
         ListingRequest listingRequest = objectMapper.readValue(request, ListingRequest.class);
         if (listingRequest.getStartingPrice() > 0) {
-            var listing = Listing.builder()
+            Listing listing = Listing.builder()
                     .userId(userService.getUserIdByEmail(SecurityContextHolder.getContext().getAuthentication().getName()))
                     .name(listingRequest.getName())
                     .description(listingRequest.getDescription())
@@ -86,15 +87,21 @@ public class ListingService {
             if (image != null) {
                 try {
                     storageService.saveImage(image, listing.getId() + ".jpg");
+                    listing.setHasImage(true);
+                    listingRepository.save(listing);
                 } catch (IOException e) {
                     //TODO saving image exception
                 }
             }
+
+
+
             return ListingResponse.builder()
                     .id(listing.getId())
                     .name(listing.getName())
                     .description(listing.getDescription())
                     .startingPrice(listing.getStartingPrice())
+                    .hasImage(listing.isHasImage())
                     .build();
         } else {
             throw new InvalidStartingPriceException();

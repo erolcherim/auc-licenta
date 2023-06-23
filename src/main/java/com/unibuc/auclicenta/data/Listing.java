@@ -40,6 +40,8 @@ public class Listing implements Persistable<String>, Serializable {
     private List<Bid> bids;
     @Field(type = FieldType.Integer)
     private int isActive;
+    @Field(type = FieldType.Boolean)
+    private boolean hasImage;
     @CreatedDate
     @Field(type = FieldType.Date, format = DateFormat.date_time)
     private Date createdDate;
