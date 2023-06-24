@@ -1,6 +1,9 @@
 package com.unibuc.auclicenta.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.lang.NonNull;
+import com.unibuc.auclicenta.controller.StringResponse;
 import com.unibuc.auclicenta.controller.listing.*;
 import com.unibuc.auclicenta.data.Listing;
 import com.unibuc.auclicenta.exception.*;
@@ -11,7 +14,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -25,7 +30,10 @@ public class ListingService {
     @Autowired
     private UserService userService;
     @Autowired
-    private FavoriteService favoriteService;
+    private StorageService storageService;
+    @Autowired
+    private ObjectMapper objectMapper;
+
 
     public Listing getListingById(String id) {
         return listingRepository.findById(id).orElseThrow(EntityNotFoundException::new);
@@ -40,22 +48,30 @@ public class ListingService {
     }
 
     public SearchResponse getListingMultiMatch(@NonNull MultiMatchSearchRequest request) {
-        List<Listing> listings = listingRepository.findByNameNearPrice(request.getName(), request.getCurrentPrice(), PageRequest.of(request.getPage(), request.getPageSize())).toList();
-        Long noResults = listingRepository.findByNameNearPrice(request.getName(), request.getCurrentPrice(), PageRequest.of(request.getPage(), request.getPageSize())).getTotalElements();
+        List<Listing> listings = listingRepository.findByNameNearPrice(request.getName(), request.getCurrentPrice(), request.getCurrentPrice() / 2, PageRequest.of(request.getPage(), request.getPageSize())).toList();
+        Long noResults = listingRepository.findByNameNearPrice(request.getName(), request.getCurrentPrice(), request.getCurrentPrice() / 2, PageRequest.of(request.getPage(), request.getPageSize())).getTotalElements();
         return SearchResponse.builder().noResults(noResults).listings(listings).build();
     }
 
     public SearchResponse getLatestListings(SearchRequest request) {
-        List<Listing> listings = listingRepository.findByIsActiveOrderByCreatedDateDesc(2, PageRequest.of(request.getPage(),
-                request.getPageSize()).withSort(Sort.Direction.DESC, "createdDate")).toList(); //TODO modify to 1
-        Long noResults = listingRepository.findByIsActiveOrderByCreatedDateDesc(2,
+        List<Listing> listings = listingRepository.findByIsActiveOrderByCreatedDateDesc(1, PageRequest.of(request.getPage(),
+                request.getPageSize()).withSort(Sort.Direction.DESC, "createdDate")).toList();
+        Long noResults = listingRepository.findByIsActiveOrderByCreatedDateDesc(1,
                 PageRequest.of(request.getPage(), request.getPageSize()).withSort(Sort.Direction.DESC, "createdDate")).getTotalElements();
         return SearchResponse.builder().noResults(noResults).listings(listings).build();
     }
 
-    public ListingResponse createListing(ListingRequest listingRequest) {
+    public SearchResponse getListingsForUser(int page, int pageSize) {
+        String userId = userService.getUserIdByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+        List<Listing> listings = listingRepository.findByUserId(userId, PageRequest.of(page, pageSize).withSort(Sort.Direction.DESC, "createdDate")).toList();
+        Long noListings = listingRepository.findByUserId(userId, PageRequest.of(page, pageSize).withSort(Sort.Direction.DESC, "createdDate")).getTotalElements();
+        return SearchResponse.builder().listings(listings).noResults(noListings).build();
+    }
+
+    public ListingResponse createListing(String request, MultipartFile image) throws JsonProcessingException {
+        ListingRequest listingRequest = objectMapper.readValue(request, ListingRequest.class);
         if (listingRequest.getStartingPrice() > 0) {
-            var listing = Listing.builder()
+            Listing listing = Listing.builder()
                     .userId(userService.getUserIdByEmail(SecurityContextHolder.getContext().getAuthentication().getName()))
                     .name(listingRequest.getName())
                     .description(listingRequest.getDescription())
@@ -67,11 +83,23 @@ public class ListingService {
 
             listingRepository.save(listing);
 
+            if (image != null) {
+                try {
+                    storageService.saveImage(image, listing.getId() + ".jpg");
+                    listing.setHasImage(true);
+                    listingRepository.save(listing);
+                } catch (IOException e) {
+                    //TODO saving image exception
+                }
+            }
+
+
             return ListingResponse.builder()
                     .id(listing.getId())
                     .name(listing.getName())
                     .description(listing.getDescription())
                     .startingPrice(listing.getStartingPrice())
+                    .hasImage(listing.isHasImage())
                     .build();
         } else {
             throw new InvalidStartingPriceException();
@@ -97,17 +125,17 @@ public class ListingService {
         }
     }
 
-    public String deleteListing(String id) {
+    public StringResponse deleteListing(String id) {
         Listing listingToDelete = listingRepository.findById(id).orElseThrow(EntityNotFoundException::new);
         if (listingToDelete.getIsActive() == 0) {
             listingRepository.delete(listingToDelete);
         } else {
             throw new ListingIsActiveException();
         }
-        return "Listing deleted successfully";
+        return new StringResponse("Listing deleted successfully");
     }
 
-    public String bidOnListing(BidRequest bidRequest, String id) {
+    public StringResponse bidOnListing(BidRequest bidRequest, String id) {
         var listing = listingRepository.findByIdAndIsActive(id, 1).orElseThrow(EntityNotFoundException::new);
         int updatedPrice = bidRequest.getUpdatedPrice();
 
@@ -129,8 +157,8 @@ public class ListingService {
             listing.setBids(bids);
             listing.setCurrentPrice(updatedPrice);
             listingRepository.save(listing);
-            favoriteService.addListingToFavorites(listing.getId());
-            return "Bid successful, new price: " + listing.getCurrentPrice() + ". Current account balance: " + accountBalance;
+//            favoriteService.addListingToFavorites(listing.getId()); //TODO 409 duplicate
+            return new StringResponse("Bid successful, new price: " + listing.getCurrentPrice() + ". Current account balance: " + accountBalance);
         } else {
             throw new InvalidBidAmountException();
         }
@@ -148,7 +176,7 @@ public class ListingService {
                 .forEach(x -> {
                     x.setIsActive(1);
                     x.setActivatedDate(new Date());
-                    x.setExpirationDate(new Date(System.currentTimeMillis() + 60 * 1000)); //30L * 24 * 60 * 60 * 1000
+                    x.setExpirationDate(new Date(System.currentTimeMillis() + 30L * 24 * 60 * 60 * 1000)); // currently 30 days 60 * 10000
                     listingRepository.save(x);
                 });
     }

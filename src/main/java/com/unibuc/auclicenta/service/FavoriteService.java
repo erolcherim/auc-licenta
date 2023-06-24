@@ -1,5 +1,7 @@
 package com.unibuc.auclicenta.service;
 
+import com.unibuc.auclicenta.controller.StringResponse;
+import com.unibuc.auclicenta.controller.listing.SearchResponse;
 import com.unibuc.auclicenta.data.Listing;
 import com.unibuc.auclicenta.data.user.User;
 import com.unibuc.auclicenta.exception.DuplicateEntityException;
@@ -8,10 +10,10 @@ import com.unibuc.auclicenta.exception.UserNotFoundException;
 import com.unibuc.auclicenta.repository.ListingRepository;
 import com.unibuc.auclicenta.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -21,19 +23,21 @@ public class FavoriteService {
     @Autowired
     private UserRepository userRepository;
 
-    public List<Listing> getListingsForLoggedInUser() {
+    public SearchResponse getFavoritesForLoggedInUser(int page, int pageSize) {
         String contextUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(contextUserEmail).orElseThrow(UserNotFoundException::new);
-        List<Listing> favoriteListings = new ArrayList<>();
-        for (String favorite :
-                user.getFavorites()) {
-            favoriteListings.add(listingRepository.findById(favorite).orElse(null));
-            favoriteListings.remove(null);
-        }
-        return favoriteListings;
+        List<Listing> favorites = listingRepository.findByIdIn(user.getFavorites().toArray(new String[0]), PageRequest.of(page, pageSize)).toList();
+        Long noFavorites = listingRepository.findByIdIn(user.getFavorites().toArray(new String[0]), PageRequest.of(page, pageSize)).getTotalElements();
+        return SearchResponse.builder().listings(favorites).noResults(noFavorites).build();
     }
 
-    public String addListingToFavorites(String id) {
+    public List<String> getFavoritesIdsCurrent(){
+        String contextUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(contextUserEmail).orElseThrow(UserNotFoundException::new);
+        return user.getFavorites();
+    }
+
+    public StringResponse addListingToFavorites(String id) {
         String contextUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(contextUserEmail).orElseThrow(UserNotFoundException::new);
         List<String> favoriteListings = user.getFavorites();
@@ -42,13 +46,13 @@ public class FavoriteService {
             favoriteListings.add(listing.getId());
             user.setFavorites(favoriteListings);
             userRepository.save(user);
-            return "Listing successfully added to favorites";
+            return new StringResponse("Listing successfully added to favorites");
         } else {
             throw new DuplicateEntityException();
         }
     }
 
-    public String removeListingFromFavorites(String id) {
+    public StringResponse removeListingFromFavorites(String id) {
         String contextUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(contextUserEmail).orElseThrow(UserNotFoundException::new);
         List<String> favoriteListings = user.getFavorites();
@@ -59,6 +63,6 @@ public class FavoriteService {
         } else {
             throw new EntityNotFoundException();
         }
-        return "Listing successfully removed from favorites";
+        return new StringResponse("Listing successfully removed from favorites");
     }
 }

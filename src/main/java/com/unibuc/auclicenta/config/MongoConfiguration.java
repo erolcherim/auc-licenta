@@ -6,6 +6,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.lang.NonNull;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.config.AbstractMongoClientConfiguration;
 import org.springframework.data.mongodb.config.EnableMongoAuditing;
@@ -24,12 +25,14 @@ public class MongoConfiguration extends AbstractMongoClientConfiguration {
 
     @NonNull
     @Override
+    @Bean
     protected String getDatabaseName() {
         return "defaultdb";
     }
 
     @NonNull
     @Override
+    @Bean
     public MongoClient mongoClient() {
         MongoClientSettings mongoClientSettings = MongoClientSettings.builder()
                 .applyConnectionString(new ConnectionString(connectionURL))
@@ -40,11 +43,13 @@ public class MongoConfiguration extends AbstractMongoClientConfiguration {
 
     @NonNull
     @Override
+    @Bean
     public Collection<String> getMappingBasePackages() {
         return Collections.singleton("com.unibuc.auc-licenta.data");
     }
 
     @Override
+    @Bean
     protected boolean autoIndexCreation() {
         return true;
     }

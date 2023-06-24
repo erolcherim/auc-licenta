@@ -1,11 +1,8 @@
 package com.unibuc.auclicenta.config;
 
-import com.mongodb.lang.NonNull;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.unibuc.auclicenta.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.jobrunr.jobs.mappers.JobMapper;
-import org.jobrunr.storage.InMemoryStorageProvider;
-import org.jobrunr.storage.StorageProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -19,15 +16,15 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 @Configuration
 @RequiredArgsConstructor
 @EnableAutoConfiguration
 @ComponentScan
+@EnableWebMvc
 public class ApplicationConfiguration {
-
+    //Authentication Beans
     @Autowired
     private UserRepository userRepository;
 
@@ -55,22 +52,8 @@ public class ApplicationConfiguration {
     }
 
     @Bean
-    public StorageProvider storageProvider(JobMapper jobMapper) {
-        InMemoryStorageProvider inMemoryStorageProvider = new InMemoryStorageProvider();
-        inMemoryStorageProvider.setJobMapper(jobMapper);
-        return inMemoryStorageProvider;
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
     }
 
-    @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        String[] allowDomains = new String[2];
-        allowDomains[0] = "http://localhost:4200";
-        allowDomains[1] = "http://localhost:8080";
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(@NonNull CorsRegistry registry) {
-                registry.addMapping("/**").allowedOrigins(allowDomains);
-            }
-        };
-    }
 }

@@ -33,12 +33,13 @@ services:
       ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
   elasticsearch:
     container_name: auc-licenta-es
+    restart: always
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.10
     hostname: elasticsearch
     environment:
       - xpack.security.enabled=false
       - "discovery.type=single-node"
-    mem_limit: 2048m
+    mem_limit: 512m
     ports:
       - 9200:9200
   kibana:

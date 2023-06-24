@@ -14,4 +14,5 @@ public class ListingResponse {
     private String name;
     private String description;
     private Integer startingPrice;
+    private Boolean hasImage;
 }

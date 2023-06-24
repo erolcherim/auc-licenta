@@ -1,15 +1,13 @@
 package com.unibuc.auclicenta.controller.favorites;
 
-import com.unibuc.auclicenta.data.Listing;
+import com.unibuc.auclicenta.controller.StringResponse;
+import com.unibuc.auclicenta.controller.listing.SearchResponse;
 import com.unibuc.auclicenta.service.FavoriteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -20,18 +18,23 @@ public class FavoriteController {
     @Autowired
     private FavoriteService favoriteService;
 
-    @GetMapping("/")
-    public ResponseEntity<List<Listing>> getAllListings() {
-        return ResponseEntity.ok(favoriteService.getListingsForLoggedInUser());
+    @GetMapping("/query")
+    public ResponseEntity<SearchResponse> getFavoritesCurrent(@RequestParam int page, @RequestParam int pageSize) {
+        return ResponseEntity.ok(favoriteService.getFavoritesForLoggedInUser(page, pageSize));
     }
 
-    @PutMapping("/add/{id}") //TODO: make it POST
-    public ResponseEntity<String> addListingToFavorites(@PathVariable String id) {
+    @GetMapping("/query-id")
+    public ResponseEntity<List<String>> getFavoritesIdsCurrent() {
+        return ResponseEntity.ok(favoriteService.getFavoritesIdsCurrent());
+    }
+
+    @PutMapping("/add/{id}")
+    public ResponseEntity<StringResponse> addListingToFavorites(@PathVariable String id) {
         return ResponseEntity.ok(favoriteService.addListingToFavorites(id));
     }
 
-    @PutMapping("/remove/{id}") //TODO: make it DELETE
-    public ResponseEntity<String> removeListingFromFavorites(@PathVariable String id) {
+    @PutMapping("/remove/{id}")
+    public ResponseEntity<StringResponse> removeListingFromFavorites(@PathVariable String id) {
         return ResponseEntity.ok(favoriteService.removeListingFromFavorites(id));
     }
 }

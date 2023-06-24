@@ -1,11 +1,16 @@
 package com.unibuc.auclicenta.controller.listing;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.unibuc.auclicenta.controller.StringResponse;
 import com.unibuc.auclicenta.data.Listing;
 import com.unibuc.auclicenta.service.ListingService;
+import com.unibuc.auclicenta.service.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 
 @Controller
@@ -13,23 +18,36 @@ import org.springframework.web.bind.annotation.*;
 public class ListingController {
     @Autowired
     private ListingService listingService;
+    @Autowired
+    private StorageService storageService;
 
     @PostMapping("/")
     @ResponseBody
-    public ResponseEntity<ListingResponse> saveListing(@RequestBody ListingRequest listingRequest) {
-        return ResponseEntity.ok(listingService.createListing(listingRequest));
+    public ResponseEntity<ListingResponse> saveListing(@RequestParam("model") String listingRequest, @RequestParam(value = "file", required = false) MultipartFile image) throws JsonProcessingException {
+        return ResponseEntity.ok(listingService.createListing(listingRequest, image));
     }
 
     @PostMapping("/bid/{id}")
     @ResponseBody
-    public ResponseEntity<String> bidOnListing(@RequestBody BidRequest bidRequest, @PathVariable String id) {
+    public ResponseEntity<StringResponse> bidOnListing(@RequestBody BidRequest bidRequest, @PathVariable String id) {
         return ResponseEntity.ok(listingService.bidOnListing(bidRequest, id));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping(path = "image/{id}", produces = MediaType.IMAGE_JPEG_VALUE)
+    public @ResponseBody ResponseEntity<byte[]> getImageByListingId(@PathVariable String id) {
+        return ResponseEntity.ok(storageService.getImage(id));
+    }
+
+    @GetMapping("/search/{id}")
     @ResponseBody
     public ResponseEntity<Listing> getListingById(@PathVariable String id) {
         return ResponseEntity.ok(listingService.getListingById(id));
+    }
+
+    @GetMapping("/search/current-user")
+    @ResponseBody
+    public ResponseEntity<SearchResponse> getListingsForCurrentUser(@RequestParam int page, @RequestParam int pageSize) {
+        return ResponseEntity.ok(listingService.getListingsForUser(page, pageSize));
     }
 
     @PostMapping("/search/latest")
@@ -39,7 +57,7 @@ public class ListingController {
 
     @PostMapping("/search/multi-search")
     @ResponseBody
-    public ResponseEntity<SearchResponse> getSearchHitScoresForNameQuery(@RequestBody MultiMatchSearchRequest request) {
+    public ResponseEntity<SearchResponse> getMultiSearchResults(@RequestBody MultiMatchSearchRequest request) {
         return ResponseEntity.ok(listingService.getListingMultiMatch(request));
     }
 
@@ -54,9 +72,9 @@ public class ListingController {
         return ResponseEntity.ok(listingService.updateListing(request, id));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/admin/{id}")
     @ResponseBody
-    public ResponseEntity<String> deleteListing(@PathVariable String id) {
+    public ResponseEntity<StringResponse> deleteListing(@PathVariable String id) {
         return ResponseEntity.ok(listingService.deleteListing(id));
     }
 }

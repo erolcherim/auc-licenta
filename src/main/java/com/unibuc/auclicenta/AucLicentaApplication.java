@@ -6,6 +6,7 @@ import org.jobrunr.scheduling.cron.Cron;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 
 import javax.annotation.PostConstruct;
 
@@ -15,6 +16,7 @@ public class AucLicentaApplication {
     private JobScheduler jobScheduler;
     @Autowired
     private ListingService listingService;
+
 
     public static void main(String[] args) {
         SpringApplication.run(AucLicentaApplication.class, args);

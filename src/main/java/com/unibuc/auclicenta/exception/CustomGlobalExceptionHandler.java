@@ -1,5 +1,7 @@
 package com.unibuc.auclicenta.exception;
 
+import com.unibuc.auclicenta.controller.StringResponse;
+import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
 import org.elasticsearch.index.IndexNotFoundException;
 import org.springframework.data.elasticsearch.NoSuchIndexException;
 import org.springframework.http.HttpHeaders;
@@ -17,91 +19,103 @@ import javax.validation.ConstraintViolationException;
 public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(UserAlreadyExistsException.class)
     public ResponseEntity<Object> userAlreadyExists(RuntimeException exception, WebRequest request) {
-        return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), HttpStatus.CONFLICT, request);
+        return handleExceptionInternal(exception, new StringResponse(exception.getMessage()), new HttpHeaders(), HttpStatus.CONFLICT, request);
     }
 
     @ExceptionHandler(AuthFailedException.class)
     public ResponseEntity<Object> authFailed(RuntimeException exception, WebRequest request) {
-        return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+        return handleExceptionInternal(exception, new StringResponse(exception.getMessage()), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<Object> constraintViolated(RuntimeException exception, WebRequest request) {
-        return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+        return handleExceptionInternal(exception, new StringResponse(exception.getMessage()), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
     @ExceptionHandler(PasswordsDoNotMatchException.class)
     public ResponseEntity<Object> passwordsDoNotMatch(RuntimeException exception, WebRequest request) {
-        return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+        return handleExceptionInternal(exception, new StringResponse(exception.getMessage()), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
     @ExceptionHandler(InvalidPasswordException.class)
     public ResponseEntity<Object> invalidPassword(RuntimeException exception, WebRequest request) {
-        return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+        return handleExceptionInternal(exception, new StringResponse(exception.getMessage()), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<Object> userNotFound(RuntimeException exception, WebRequest request) {
-        return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), HttpStatus.NOT_FOUND, request);
+        return handleExceptionInternal(exception, new StringResponse(exception.getMessage()), new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }
 
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<Object> userAuthNotFound(RuntimeException exception, WebRequest request) {
-        return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), HttpStatus.NOT_FOUND, request);
+        return handleExceptionInternal(exception, new StringResponse(exception.getMessage()), new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }
 
     @ExceptionHandler(SamePasswordException.class)
     public ResponseEntity<Object> samePassword(RuntimeException exception, WebRequest request) {
-        return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+        return handleExceptionInternal(exception, new StringResponse(exception.getMessage()), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<Object> entityNotFound(RuntimeException exception, WebRequest request) {
-        return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), HttpStatus.NOT_FOUND, request);
+        return handleExceptionInternal(exception, new StringResponse(exception.getMessage()), new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }
 
     @ExceptionHandler(InvalidBidAmountException.class)
     public ResponseEntity<Object> invalidBidAmount(RuntimeException exception, WebRequest request) {
-        return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+        return handleExceptionInternal(exception, new StringResponse(exception.getMessage()), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
     @ExceptionHandler(IndexNotFoundException.class)
     public ResponseEntity<Object> invalidIndex(RuntimeException exception, WebRequest request) {
-        return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+        return handleExceptionInternal(exception, new StringResponse(exception.getMessage()), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
     @ExceptionHandler(NoSuchIndexException.class)
     public ResponseEntity<Object> noSuchIndex(RuntimeException exception, WebRequest request) {
-        return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+        return handleExceptionInternal(exception, new StringResponse(exception.getMessage()), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
     @ExceptionHandler(DuplicateEntityException.class)
     public ResponseEntity<Object> duplicateEntity(RuntimeException exception, WebRequest request) {
-        return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), HttpStatus.CONFLICT, request);
+        return handleExceptionInternal(exception, new StringResponse(exception.getMessage()), new HttpHeaders(), HttpStatus.CONFLICT, request);
     }
 
     @ExceptionHandler(ListingIsActiveException.class)
     public ResponseEntity<Object> attemptToDelete(RuntimeException exception, WebRequest request) {
-        return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+        return handleExceptionInternal(exception, new StringResponse(exception.getMessage()), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
     @ExceptionHandler(InvalidStartingPriceException.class)
     public ResponseEntity<Object> invalidStartingPrice(RuntimeException exception, WebRequest request) {
-        return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+        return handleExceptionInternal(exception, new StringResponse(exception.getMessage()), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
     @ExceptionHandler(InsufficientFundsException.class)
     public ResponseEntity<Object> insufficientFunds(RuntimeException exception, WebRequest request) {
-        return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+        return handleExceptionInternal(exception, new StringResponse(exception.getMessage()), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
     @ExceptionHandler(InvalidTopUpAmountException.class)
     public ResponseEntity<Object> invalidTopUpAmount(RuntimeException exception, WebRequest request) {
-        return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+        return handleExceptionInternal(exception, new StringResponse(exception.getMessage()), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
     @ExceptionHandler(CannotBidOnOwnListingException.class)
     public ResponseEntity<Object> canNotBidOnOwnListing(RuntimeException exception, WebRequest request) {
-        return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+        return handleExceptionInternal(exception, new StringResponse(exception.getMessage()), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
+
+    @ExceptionHandler(FileSizeLimitExceededException.class)
+    public ResponseEntity<Object> fileSizeLimitExceeded(RuntimeException exception, WebRequest request) {
+        return handleExceptionInternal(exception, new StringResponse("File size can not exceed 8 MB"), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ExceptionHandler(FileTypeNotAcceptedException.class)
+    public ResponseEntity<Object> fileTypeNotAccepted(RuntimeException exception, WebRequest request) {
+        return handleExceptionInternal(exception, new StringResponse(exception.getMessage()), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+
+
 }
