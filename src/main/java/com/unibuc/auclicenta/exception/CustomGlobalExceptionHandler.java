@@ -1,6 +1,7 @@
 package com.unibuc.auclicenta.exception;
 
 import com.unibuc.auclicenta.controller.StringResponse;
+import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
 import org.elasticsearch.index.IndexNotFoundException;
 import org.springframework.data.elasticsearch.NoSuchIndexException;
 import org.springframework.http.HttpHeaders;
@@ -106,9 +107,15 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
         return handleExceptionInternal(exception, new StringResponse(exception.getMessage()), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
+    @ExceptionHandler(FileSizeLimitExceededException.class)
+    public ResponseEntity<Object> fileSizeLimitExceeded(RuntimeException exception, WebRequest request) {
+        return handleExceptionInternal(exception, new StringResponse("File size can not exceed 8 MB"), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+
     @ExceptionHandler(FileTypeNotAcceptedException.class)
-    public ResponseEntity<Object> invalidFileType(RuntimeException exception, WebRequest request) {
+    public ResponseEntity<Object> fileTypeNotAccepted(RuntimeException exception, WebRequest request) {
         return handleExceptionInternal(exception, new StringResponse(exception.getMessage()), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
+
 
 }

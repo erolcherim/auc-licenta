@@ -38,23 +38,14 @@ public interface ListingRepository extends ElasticsearchRepository<Listing, Stri
             "                \"name\": \"?0\"\n" +
             "              }\n" +
             "            }\n" +
-            "          ],\n" +
-            "          \"filter\":{\n" +
-            "            \"term\": {\"isActive\": \"1\"}\n" +
-            "          }\n" +
+            "          ]\n" +
             "        }\n" +
             "      },\n" +
             "      \"functions\": [\n" +
             "        {\n" +
             "          \"script_score\": {\n" +
             "            \"script\": {\n" +
-            "              \"source\": \"decayNumericLinear(params.origin, params.scale, params.offset, params.decay,doc['currentPrice'].value)\",\n" +
-            "              \"params\": {\n" +
-            "                \"origin\": ?1,\n" +
-            "                \"scale\": ?2,\n" + // TODO CHECK IF STILL IT WORKS
-            "                \"decay\": 0.5,\n" +
-            "                \"offset\": 0\n" +
-            "              }\n" +
+            "              \"source\": \"decayNumericLinear(params.origin, params.scale, params.offset, params.decay,doc['currentPrice'].value)\", \"params\":{\"origin\":?1, \"scale\":?2, \"decay\":0.5, \"offset\":0}\n" +
             "            }\n" +
             "          }\n" +
             "        }\n" +

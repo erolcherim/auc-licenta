@@ -12,9 +12,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.ServletContext;
-import java.io.IOException;
-
 
 @Controller
 @RequestMapping("/api/v1/listing")
@@ -23,14 +20,6 @@ public class ListingController {
     private ListingService listingService;
     @Autowired
     private StorageService storageService;
-    @Autowired
-    private ServletContext servletContext;
-
-//    @PostMapping("/")
-//    @ResponseBody
-//    public ResponseEntity<ListingResponse> saveListing(@RequestBody ListingRequest listingRequest) {
-//        return ResponseEntity.ok(listingService.createListing(listingRequest));
-//    }
 
     @PostMapping("/")
     @ResponseBody
@@ -68,7 +57,7 @@ public class ListingController {
 
     @PostMapping("/search/multi-search")
     @ResponseBody
-    public ResponseEntity<SearchResponse> getSearchHitScoresForNameQuery(@RequestBody MultiMatchSearchRequest request) {
+    public ResponseEntity<SearchResponse> getMultiSearchResults(@RequestBody MultiMatchSearchRequest request) {
         return ResponseEntity.ok(listingService.getListingMultiMatch(request));
     }
 
