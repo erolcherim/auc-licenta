@@ -48,8 +48,8 @@ public class ListingService {
     }
 
     public SearchResponse getListingMultiMatch(@NonNull MultiMatchSearchRequest request) {
-        List<Listing> listings = listingRepository.findByNameNearPrice(request.getName(), request.getCurrentPrice(), request.getCurrentPrice() / 2, PageRequest.of(request.getPage(), request.getPageSize())).toList();
-        Long noResults = listingRepository.findByNameNearPrice(request.getName(), request.getCurrentPrice(), request.getCurrentPrice() / 2, PageRequest.of(request.getPage(), request.getPageSize())).getTotalElements();
+        List<Listing> listings = listingRepository.findByNameNearPrice(request.getName(), request.getCurrentPrice(), request.getCurrentPrice() / 4, PageRequest.of(request.getPage(), request.getPageSize())).toList();
+        Long noResults = listingRepository.findByNameNearPrice(request.getName(), request.getCurrentPrice(), request.getCurrentPrice() / 4, PageRequest.of(request.getPage(), request.getPageSize())).getTotalElements();
         return SearchResponse.builder().noResults(noResults).listings(listings).build();
     }
 
@@ -106,20 +106,34 @@ public class ListingService {
         }
     }
 
-    public ListingRequest updateListing(ListingRequest request, String id) {
+    public StringResponse updateListing(String request, MultipartFile image, String id) throws JsonProcessingException {
+        ListingRequest listingRequest = objectMapper.readValue(request, ListingRequest.class);
         Listing listingToUpdate = listingRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+        String currentUserId = userService.getUserIdByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+        if (!currentUserId.equals(listingToUpdate.getUserId())){
+            throw new CanOnlyDeleteOwnListingException();
+        }
         if (listingToUpdate.getIsActive() == 0) {
-            String updatedName = request.getName();
+            String updatedName = listingRequest.getName();
             listingToUpdate.setName(updatedName);
-            int updatedPrice = request.getStartingPrice();
+            listingToUpdate.setDescription(listingRequest.getDescription());
+            int updatedPrice = listingRequest.getStartingPrice();
             listingToUpdate.setStartingPrice(updatedPrice);
             listingToUpdate.setCurrentPrice(updatedPrice);
             listingToUpdate.setCreatedDate(new Date()); //Whenever a user modifies a listing during the pre-activation period the timer resets
             listingRepository.save(listingToUpdate);
-            return ListingRequest.builder()
-                    .name(updatedName)
-                    .startingPrice(updatedPrice)
-                    .build();
+
+            if (image != null) {
+                try {
+                    storageService.saveImage(image, listingToUpdate.getId() + ".jpg");
+                    listingToUpdate.setHasImage(true);
+                    listingRepository.save(listingToUpdate);
+                } catch (IOException e) {
+                    //TODO saving image exception
+                }
+            }
+
+            return new StringResponse("Listing Updated Successfully");
         } else {
             throw new ListingIsActiveException();
         }
@@ -127,11 +141,18 @@ public class ListingService {
 
     public StringResponse deleteListing(String id) {
         Listing listingToDelete = listingRepository.findById(id).orElseThrow(EntityNotFoundException::new);
-        if (listingToDelete.getIsActive() == 0) {
-            listingRepository.delete(listingToDelete);
-        } else {
-            throw new ListingIsActiveException();
+        List<Listing.Bid> bidsProcessed = listingToDelete.getBids().stream()
+                .filter(b -> userService.userExists(b.getBidderId()))
+                .collect(Collectors.toList());
+
+        if (bidsProcessed.size() != 0) {
+            Listing.Bid highestBidder = bidsProcessed.get(bidsProcessed.size() - 1);
+            bidsProcessed.remove(highestBidder);
+            listingToDelete.setCurrentPrice(highestBidder.getUpdatedPrice());
+
+            bidsProcessed.forEach(bi -> userService.refundBid(bi.getUpdatedPrice(), bi.getBidderId()));
         }
+        listingRepository.delete(listingToDelete);
         return new StringResponse("Listing deleted successfully");
     }
 
@@ -204,5 +225,18 @@ public class ListingService {
                     }
                     listingRepository.save(x);
                 });
+    }
+
+    public StringResponse deleteOwnListing(String id) {
+        String loggedInUserId = userService.getUserIdByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+        Listing listingToDelete = listingRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+        if (listingToDelete.getIsActive() == 0 && listingToDelete.getUserId().equals(loggedInUserId)) {
+            listingRepository.delete(listingToDelete);
+        } else if(!listingToDelete.getUserId().equals(loggedInUserId)) {
+            throw new CanOnlyDeleteOwnListingException();
+        } else {
+            throw new ListingIsActiveException();
+        }
+        return new StringResponse("Listing deleted successfully");
     }
 }

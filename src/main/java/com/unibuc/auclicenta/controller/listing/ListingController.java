@@ -68,8 +68,13 @@ public class ListingController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ListingRequest> updateListingById(@RequestBody ListingRequest request, @PathVariable String id) {
-        return ResponseEntity.ok(listingService.updateListing(request, id));
+    public ResponseEntity<StringResponse> updateListingById(@RequestParam("model") String listingRequest, @RequestParam(value = "file", required = false) MultipartFile image, @PathVariable String id) throws JsonProcessingException {
+        return ResponseEntity.ok(listingService.updateListing(listingRequest, image, id));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<StringResponse> deleteOwnListingById(@PathVariable String id){
+        return ResponseEntity.ok(listingService.deleteOwnListing(id));
     }
 
     @DeleteMapping("/admin/{id}")

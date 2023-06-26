@@ -11,7 +11,7 @@ import java.util.Optional;
 
 
 public interface ListingRepository extends ElasticsearchRepository<Listing, String> {
-    @Query("{\"match_phrase_prefix\": {\"name\": {\"query\": \"?0\"}}}")
+    @Query("{\"match\": {\"name\": {\"query\": \"?0\"}}}")
         //TODO add isActive = 1 and recheck if all queries work
     Page<Listing> findByName(String name, Pageable pageable);
 
@@ -38,14 +38,24 @@ public interface ListingRepository extends ElasticsearchRepository<Listing, Stri
             "                \"name\": \"?0\"\n" +
             "              }\n" +
             "            }\n" +
-            "          ]\n" +
+            "          ],\n" +
+            "          \"minimum_should_match\": 1,\n" +
+            "          \"filter\":{\n" +
+            "            \"term\": {\"isActive\": \"1\"}\n" +
+            "          }\n" +
             "        }\n" +
             "      },\n" +
             "      \"functions\": [\n" +
             "        {\n" +
             "          \"script_score\": {\n" +
             "            \"script\": {\n" +
-            "              \"source\": \"decayNumericLinear(params.origin, params.scale, params.offset, params.decay,doc['currentPrice'].value)\", \"params\":{\"origin\":?1, \"scale\":?2, \"decay\":0.5, \"offset\":0}\n" +
+            "              \"source\": \"decayNumericLinear(params.origin, params.scale, params.offset, params.decay,doc['currentPrice'].value)\",\n" +
+            "              \"params\": {\n" +
+            "                \"origin\": ?1,\n" +
+            "                \"scale\": ?2,\n" +
+            "                \"decay\": 0.5,\n" +
+            "                \"offset\": 0\n" +
+            "              }\n" +
             "            }\n" +
             "          }\n" +
             "        }\n" +

@@ -117,5 +117,10 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
         return handleExceptionInternal(exception, new StringResponse(exception.getMessage()), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
+    @ExceptionHandler(CanOnlyDeleteOwnListingException.class)
+    public ResponseEntity<Object> canOnlyDeleteOwnListing(RuntimeException exception, WebRequest request) {
+        return handleExceptionInternal(exception, new StringResponse(exception.getMessage()), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+
 
 }
