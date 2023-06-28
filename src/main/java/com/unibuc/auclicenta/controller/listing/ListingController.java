@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.unibuc.auclicenta.controller.StringResponse;
 import com.unibuc.auclicenta.data.Listing;
 import com.unibuc.auclicenta.service.ListingService;
+import com.unibuc.auclicenta.service.RecommendationService;
 import com.unibuc.auclicenta.service.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -11,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 
 @Controller
@@ -20,11 +23,19 @@ public class ListingController {
     private ListingService listingService;
     @Autowired
     private StorageService storageService;
+    @Autowired
+    private RecommendationService recommendationService;
 
     @PostMapping("/")
     @ResponseBody
     public ResponseEntity<ListingResponse> saveListing(@RequestParam("model") String listingRequest, @RequestParam(value = "file", required = false) MultipartFile image) throws JsonProcessingException {
         return ResponseEntity.ok(listingService.createListing(listingRequest, image));
+    }
+
+    @PostMapping("/search/recommended")
+    @ResponseBody
+    public List<Listing> getRecommendations(@RequestBody RecommendationRequest recommendationRequest){
+        return recommendationService.getListingRecommendations(recommendationRequest);
     }
 
     @PostMapping("/bid/{id}")

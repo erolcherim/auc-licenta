@@ -4,6 +4,7 @@ import com.unibuc.auclicenta.data.Listing;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.annotations.Query;
+import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 
 import java.util.List;
@@ -14,6 +15,8 @@ public interface ListingRepository extends ElasticsearchRepository<Listing, Stri
     @Query("{\"match\": {\"name\": {\"query\": \"?0\"}}}")
         //TODO add isActive = 1 and recheck if all queries work
     Page<Listing> findByName(String name, Pageable pageable);
+
+    List<SearchHit<Listing>> findByName(String name);
 
     Optional<Listing> findByIdAndIsActive(String id, int isActive);
 
