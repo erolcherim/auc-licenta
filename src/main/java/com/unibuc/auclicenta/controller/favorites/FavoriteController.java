@@ -18,12 +18,17 @@ public class FavoriteController {
     @Autowired
     private FavoriteService favoriteService;
 
-    @GetMapping("/query")
+    @GetMapping("/")
     public ResponseEntity<SearchResponse> getFavoritesCurrent(@RequestParam int page, @RequestParam int pageSize) {
         return ResponseEntity.ok(favoriteService.getFavoritesForLoggedInUser(page, pageSize));
     }
 
-    @GetMapping("/query-id")
+    @GetMapping("/won")
+    public ResponseEntity<SearchResponse> getWonCurrent(@RequestParam int page, @RequestParam int pageSize) {
+        return ResponseEntity.ok(favoriteService.getWonListingsForLoggedInUser(page, pageSize));
+    }
+
+    @GetMapping("/ids")
     public ResponseEntity<List<String>> getFavoritesIdsCurrent() {
         return ResponseEntity.ok(favoriteService.getFavoritesIdsCurrent());
     }

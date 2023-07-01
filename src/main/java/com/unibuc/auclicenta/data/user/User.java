@@ -40,6 +40,7 @@ public class User implements UserDetails {
     @CreatedDate
     private Date registeredDate;
     private List<String> favorites;
+    private List<String> wonBids;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

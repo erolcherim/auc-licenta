@@ -10,6 +10,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class UserService {
     @Autowired
@@ -107,6 +109,14 @@ public class UserService {
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
         int currentBalance = user.getBalance();
         user.setBalance(currentBalance + amount);
+        userRepository.save(user);
+    }
+
+    public void addListingToWonListings(String listingId, String userId){
+        User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+        List<String> wonBids = user.getWonBids();
+        wonBids.add(listingId);
+        user.setWonBids(wonBids);
         userRepository.save(user);
     }
 }

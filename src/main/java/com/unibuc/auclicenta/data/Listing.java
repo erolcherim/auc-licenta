@@ -65,6 +65,8 @@ public class Listing implements Persistable<String>, Serializable {
     public static class Bid{
         @Field(type = FieldType.Text)
         private String bidderId;
+        @Field(type = FieldType.Text)
+        private String bidderName;
         @Field(type = FieldType.Integer)
         private Integer updatedPrice;
         @Field(type = FieldType.Date, format = DateFormat.date_time)

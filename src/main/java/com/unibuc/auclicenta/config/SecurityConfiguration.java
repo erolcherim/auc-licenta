@@ -50,9 +50,11 @@ public class SecurityConfiguration {
 
     @Bean
     public WebMvcConfigurer corsConfigurer() {
-        String[] allowDomains = new String[2];
+        String[] allowDomains = new String[3];
         allowDomains[0] = "http://localhost:4200";
         allowDomains[1] = "http://localhost:8080";
+        allowDomains[2] = "https://9f78-188-26-184-88.ngrok-free.app";
+
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(@NonNull CorsRegistry registry) {

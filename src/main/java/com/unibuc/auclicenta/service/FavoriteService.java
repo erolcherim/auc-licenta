@@ -31,6 +31,14 @@ public class FavoriteService {
         return SearchResponse.builder().listings(favorites).noResults(noFavorites).build();
     }
 
+    public SearchResponse getWonListingsForLoggedInUser(int page, int pageSize) {
+        String contextUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(contextUserEmail).orElseThrow(UserNotFoundException::new);
+        List<Listing> wonBids = listingRepository.findByIdIn(user.getWonBids().toArray(new String[0]), PageRequest.of(page, pageSize)).toList();
+        Long noWonBids = listingRepository.findByIdIn(user.getWonBids().toArray(new String[0]), PageRequest.of(page, pageSize)).getTotalElements();
+        return SearchResponse.builder().listings(wonBids).noResults(noWonBids).build();
+    }
+
     public List<String> getFavoritesIdsCurrent(){
         String contextUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(contextUserEmail).orElseThrow(UserNotFoundException::new);

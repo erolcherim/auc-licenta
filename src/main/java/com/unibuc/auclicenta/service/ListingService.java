@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.lang.NonNull;
 import com.unibuc.auclicenta.controller.StringResponse;
 import com.unibuc.auclicenta.controller.listing.*;
+import com.unibuc.auclicenta.controller.user.UserResponse;
 import com.unibuc.auclicenta.data.Listing;
 import com.unibuc.auclicenta.exception.*;
 import com.unibuc.auclicenta.repository.ListingRepository;
@@ -161,12 +162,14 @@ public class ListingService {
         int updatedPrice = bidRequest.getUpdatedPrice();
 
         String loggedInUserId = userService.getUserIdByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+        UserResponse loggedInUser = userService.getUserById(loggedInUserId);
 
         if (loggedInUserId.equals(listing.getUserId())) {
             throw new CannotBidOnOwnListingException();
         }
         Listing.Bid bid = Listing.Bid.builder()
                 .bidderId(loggedInUserId)
+                .bidderName(loggedInUser.getFirstName() + " " + loggedInUser.getLastName().substring(0,1))
                 .updatedPrice(bidRequest.getUpdatedPrice())
                 .createdDate(new Date())
                 .build();
@@ -220,6 +223,7 @@ public class ListingService {
                         bidsProcessed.remove(highestBidder);
                         x.setCurrentPrice(highestBidder.getUpdatedPrice());
 
+                        userService.addListingToWonListings(x.getId(), highestBidder.getBidderId());
                         userService.refundBid(highestBidder.getUpdatedPrice(), x.getUserId());
                         bidsProcessed.forEach(bi -> userService.refundBid(bi.getUpdatedPrice(), bi.getBidderId()));
                     }

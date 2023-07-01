@@ -41,6 +41,7 @@ public class AuthenticationService {
                 .balance(10)
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
                 .favorites(new ArrayList<>())
+                .wonBids(new ArrayList<>())
                 .role(Role.USER)
                 .build();
         if (!registerRequest.getPassword().equals(registerRequest.getConfirmPassword())) {
