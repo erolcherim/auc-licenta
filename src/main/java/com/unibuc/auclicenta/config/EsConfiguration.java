@@ -1,6 +1,7 @@
 package com.unibuc.auclicenta.config;
 
 import com.mongodb.lang.NonNull;
+import org.apache.http.HttpHost;
 import org.jobrunr.jobs.mappers.JobMapper;
 import org.jobrunr.storage.nosql.elasticsearch.ElasticSearchStorageProvider;
 import org.springframework.context.annotation.Bean;
@@ -18,14 +19,15 @@ public class EsConfiguration extends ElasticsearchConfiguration {
     @Override
     public ClientConfiguration clientConfiguration() {
         return ClientConfiguration.builder()
-//                .connectedTo("elasticsearch:9200") //running inside container TODO modify when releasing with docker img
-                .connectedTo("localhost:9200") //running locally on machine
+                .connectedTo("localhost:9200") //running inside container TODO modify when releasing with docker img
+//                .connectedTo("localhost:9200") //running locally on machine
                 .build();
     }
 
     @Bean
     public ElasticSearchStorageProvider elasticSearchStorageProvider(JobMapper jobMapper) {
-        ElasticSearchStorageProvider elasticSearchStorageProvider = new ElasticSearchStorageProvider("localhost", 9200);
+        HttpHost host = new HttpHost("localhost", 9200);
+        ElasticSearchStorageProvider elasticSearchStorageProvider = new ElasticSearchStorageProvider(host);
         elasticSearchStorageProvider.setJobMapper(jobMapper);
         return elasticSearchStorageProvider;
     }
