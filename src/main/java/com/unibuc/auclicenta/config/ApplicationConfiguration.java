@@ -3,6 +3,9 @@ package com.unibuc.auclicenta.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.unibuc.auclicenta.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.jobrunr.jobs.mappers.JobMapper;
+import org.jobrunr.storage.InMemoryStorageProvider;
+import org.jobrunr.storage.StorageProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -54,6 +57,13 @@ public class ApplicationConfiguration {
     @Bean
     public ObjectMapper objectMapper() {
         return new ObjectMapper();
+    }
+
+    @Bean
+    public StorageProvider storageProvider(JobMapper jobMapper) {
+        InMemoryStorageProvider inMemoryStorageProvider = new InMemoryStorageProvider();
+        inMemoryStorageProvider.setJobMapper(jobMapper);
+        return inMemoryStorageProvider;
     }
 
 }

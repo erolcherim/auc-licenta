@@ -18,7 +18,7 @@ import java.util.Objects;
 public class StorageService {
     public void saveImage(MultipartFile multipartFile, String fileName) throws IOException {
         if (Objects.equals(FilenameUtils.getExtension(multipartFile.getOriginalFilename()), "jpg") || Objects.equals(FilenameUtils.getExtension(multipartFile.getOriginalFilename()), "jpeg")) {
-            String destinationFolder = "./photos/";
+            String destinationFolder = "./";
             byte[] bytes = multipartFile.getBytes();
             Path path = Paths.get(destinationFolder + fileName);
             Files.write(path, bytes);
@@ -29,7 +29,7 @@ public class StorageService {
 
     public byte[] getImage(String id) {
         try {
-            FileInputStream in = new FileInputStream("./photos/" + id + ".jpg");
+            FileInputStream in = new FileInputStream("./" + id + ".jpg");
             return in.readAllBytes();
         } catch (IOException e) {
             throw new EntityNotFoundException();
@@ -37,7 +37,7 @@ public class StorageService {
     }
 
     public boolean deleteImage(String id) {
-        File image = new File("./photos" + id + ".jpg");
+        File image = new File("./" + id + ".jpg");
         return image.delete();
     }
 }

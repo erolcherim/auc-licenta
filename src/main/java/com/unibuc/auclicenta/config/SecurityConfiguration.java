@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -27,7 +28,7 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.cors()
+        httpSecurity.cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues())
                 .and()
                 .csrf()
                 .disable()
@@ -48,22 +49,22 @@ public class SecurityConfiguration {
         return httpSecurity.build();
     }
 
-    @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        String[] allowDomains = new String[3];
-        allowDomains[0] = "http://localhost:4200";
-        allowDomains[1] = "http://localhost:8080";
-        allowDomains[2] = "https://9f78-188-26-184-88.ngrok-free.app";
-
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(@NonNull CorsRegistry registry) {
-                registry.addMapping("/**")
-                        .allowedOrigins(allowDomains)
-                        .allowedMethods("*")
-                        .allowedHeaders("*")
-                        .allowCredentials(true);
-            }
-        };
-    }
+//    @Bean
+//    public WebMvcConfigurer corsConfigurer() {
+//        String[] allowDomains = new String[3];
+//        allowDomains[0] = "http://localhost:4200";
+//        allowDomains[1] = "http://localhost:8080";
+//        allowDomains[2] = "https://9f78-188-26-184-88.ngrok-free.app";
+//
+//        return new WebMvcConfigurer() {
+//            @Override
+//            public void addCorsMappings(@NonNull CorsRegistry registry) {
+//                registry.addMapping("/**")
+//                        .allowedOrigins(allowDomains)
+//                        .allowedMethods("*")
+//                        .allowedHeaders("*")
+//                        .allowCredentials(true);
+//            }
+//        };
+//    }
 }
