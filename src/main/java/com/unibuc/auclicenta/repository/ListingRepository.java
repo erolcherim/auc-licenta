@@ -12,7 +12,16 @@ import java.util.Optional;
 
 
 public interface ListingRepository extends ElasticsearchRepository<Listing, String> {
-    @Query("{\"match\": {\"name\": {\"query\": \"?0\"}}}")
+    @Query("{\n" +
+            "    \"bool\":{\n" +
+            "      \"must\":[\n" +
+            "        {\"match\":{\"name\":\"?0\"}}  \n" +
+            "      ],\n" +
+            "      \"filter\":[\n" +
+            "        {\"term\":{\"isActive\":?1}}\n" +
+            "      ]\n" +
+            "    }\n" +
+            "  }")
         //TODO add isActive = 1 and recheck if all queries work
     Page<Listing> findByNameAndIsActive(String name, int isActive, Pageable pageable);
 
