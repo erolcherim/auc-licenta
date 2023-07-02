@@ -43,8 +43,8 @@ public class ListingService {
     public SearchResponse getListingByNameWithNumber(SearchRequest request) {
         // 0 = ASC, * = DESC
         Sort.Direction direction = request.getSortOrder() == 0 ? Sort.Direction.ASC : Sort.Direction.DESC;
-        Long noResults = listingRepository.findByName(request.getName(), PageRequest.of(request.getPage(), request.getPageSize()).withSort(direction, request.getSortBy())).getTotalElements();
-        List<Listing> l = listingRepository.findByName(request.getName(), PageRequest.of(request.getPage(), request.getPageSize()).withSort(direction, request.getSortBy())).toList();
+        Long noResults = listingRepository.findByNameAndIsActive(request.getName(), 1, PageRequest.of(request.getPage(), request.getPageSize()).withSort(direction, request.getSortBy())).getTotalElements();
+        List<Listing> l = listingRepository.findByNameAndIsActive(request.getName(), 1, PageRequest.of(request.getPage(), request.getPageSize()).withSort(direction, request.getSortBy())).toList();
         return SearchResponse.builder().noResults(noResults).listings(l).build();
     }
 

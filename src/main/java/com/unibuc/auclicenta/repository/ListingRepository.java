@@ -14,9 +14,9 @@ import java.util.Optional;
 public interface ListingRepository extends ElasticsearchRepository<Listing, String> {
     @Query("{\"match\": {\"name\": {\"query\": \"?0\"}}}")
         //TODO add isActive = 1 and recheck if all queries work
-    Page<Listing> findByName(String name, Pageable pageable);
+    Page<Listing> findByNameAndIsActive(String name, int isActive, Pageable pageable);
 
-    List<SearchHit<Listing>> findByName(String name);
+    List<SearchHit<Listing>> findByNameAndIsActive(String name, int isActive);
 
     Optional<Listing> findByIdAndIsActive(String id, int isActive);
 

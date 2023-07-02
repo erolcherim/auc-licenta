@@ -23,7 +23,7 @@ public class RecommendationService {
 
         for (int i = 1; i <= noCategories; i++) {
             List<SearchHit<Listing>> currentSearch;
-            currentSearch = listingRepository.findByName(recommendationRequest.getSearchHits().get(i - 1));
+            currentSearch = listingRepository.findByNameAndIsActive(recommendationRequest.getSearchHits().get(i - 1), 1);
             for (SearchHit<Listing> searchHit : currentSearch) {
                 totalSearchHits.put(searchHit, i);
             }
